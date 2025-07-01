@@ -25,6 +25,8 @@ Run with:
   go run .
   ```
 
+---
+
 ## Development
 
 ### Goals
@@ -52,3 +54,31 @@ Run with:
   - net/http
   - sync
 
+---
+
+## File Structure
+
+```
+.                                        # Root
+├── cmd/
+│   └── custom-load-balancer/
+│       └── main.go                      # Entry point
+├── internal/                            # Package imports
+│   ├── server-pool/
+│   │   ├── pool.go                      # Core logic, add/remove servers, track connections, health status
+│   │   └── ...                          # Additional utility
+│   └── lb-algorithms/                   # Implementations of load balancing algorithms
+│       ├── round_robin.go
+│       ├── weighted_round_robin.go
+│       ├── least_connections.go
+│       ├── ip_hash.go
+│       ├── random.go
+│       ├── ...                          # Any other algorithms
+│       └── utils.go                     # Common helpers
+├── demo/                                # Simulate usage of the LB
+│   ├── client.go                        # Send client packets
+│   └── server.go                        # Simple server template
+├── servers.conf                         # Server list (file type tbd)                           
+├── go.mod                               # Go module definition (tracks dependencies and package name) 
+└── README.MD                            # ...
+```
