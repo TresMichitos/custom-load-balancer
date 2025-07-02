@@ -48,6 +48,11 @@ Run with:
 - [Docker Example](https://docs.docker.com/get-started/workshop/02_our_app/)
 - [How Docker Compose works](https://docs.docker.com/compose/intro/compose-application-model/)
 
+### Docker Resources
+
+- [Setup](https://medium.com/@aedemirsen/load-balancing-with-nginx-c1f19840e29)
+- [Docker Containers](https://medium.com/@aedemirsen/load-balancing-with-docker-compose-and-nginx-b9077696f624)
+
 ### Possible Libraries To Use
 
 - Included in Go standard library:
