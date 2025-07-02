@@ -23,7 +23,12 @@ Custom implementation of a load balancer using Go.
 
 Run with:
   ```
-  go run .
+  go run ./cmd/custom-load-balancer/
+  ```
+
+Can send requests to load balancer with:
+  ```
+  curl http://localhost:8080
   ```
 
 ---
