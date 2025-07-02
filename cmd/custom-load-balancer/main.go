@@ -1,10 +1,11 @@
 package main
 
 import (
-	"fmt"
+	"github.com/TresMichitos/custom-load-balancer/internal/server-pool"
 )
 
 func main() {
-	fmt.Println("Hello World!")
+	var server serverpool.Server
+	server.StartLoadBalancer()
 }
 
