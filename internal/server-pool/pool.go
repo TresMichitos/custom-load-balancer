@@ -3,6 +3,7 @@
 package serverpool
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httputil"
@@ -18,12 +19,12 @@ type ServerNode struct {
 }
 
 // Factory function to initialise a new ServerNode object
-func NewServerNode (urlInput string) *ServerNode {
+func NewServerNode (urlInput string) (*ServerNode, error) {
 	url, err := url.Parse(urlInput)
 	if err != nil {
-		fmt.Println("Invalid URL")
+		return nil, errors.New("Invalid URL")
 	}
-	return &ServerNode{URL: urlInput, ReverseProxy: httputil.NewSingleHostReverseProxy(url)}
+	return &ServerNode{URL: urlInput, ReverseProxy: httputil.NewSingleHostReverseProxy(url)}, nil
 }
 
 // Proxy function to forward HTTP request to server node
@@ -41,7 +42,12 @@ type ServerPool struct {
 func NewServerPool (urls []string) *ServerPool {
 	var serverPool ServerPool
 	for _, url := range urls {
-		serverPool.Pool = append(serverPool.Pool, NewServerNode(url))
+		newServerNode, err := NewServerNode(url)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		serverPool.Pool = append(serverPool.Pool, newServerNode)
 	}
 	return &serverPool
 }
