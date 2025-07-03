@@ -1,3 +1,5 @@
+// Entrypoint of custom load balancer
+
 package main
 
 import (
