@@ -37,3 +37,12 @@ type ServerPool struct {
 	mu sync.Mutex
 }
 
+// Factory function to initialise a new ServerPool object
+func NewServerPool (urls []string) *ServerPool {
+	var serverPool ServerPool
+	for _, url := range urls {
+		serverPool.Pool = append(serverPool.Pool, NewServerNode(url))
+	}
+	return &serverPool
+}
+
