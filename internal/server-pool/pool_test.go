@@ -18,7 +18,9 @@ func TestServerPoolFunctionality (t *testing.T) {
 	}
 	var serverPool ServerPool = ServerPool{}
 	for _, url := range urls {
+		serverPool.mu.Lock()
 		serverPool.Pool = append(serverPool.Pool, NewServerNode(url))
+		serverPool.mu.Unlock()
 	}
 
 	// Use each server node to forward HTTP request
