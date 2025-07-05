@@ -1,14 +1,36 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
+type reply struct {
+	Hostname  string `json:"hostname"`
+	Port      string `json:"port"`
+	Timestamp string `json:"timestamp"`
+}
+
+var listenPort string
+
 func handler(w http.ResponseWriter, _ *http.Request) {
-	fmt.Fprintln(w, "Hello, world!")
+	w.Header().Set("Content-Type", "application/json")
+
+	hostname := os.Getenv("HOSTNAME")
+	if hostname == "" {
+		if h, err := os.Hostname(); err == nil {
+			hostname = h
+		}
+	}
+
+	_ = json.NewEncoder(w).Encode(reply{
+		Hostname:  hostname,
+		Port:      listenPort,
+		Timestamp: time.Now().Format(time.RFC3339),
+	})
 }
 
 func main() {
@@ -17,6 +39,7 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
+	listenPort = port
 	addr := ":" + port
 
 	http.HandleFunc("/", handler)
