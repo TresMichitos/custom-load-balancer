@@ -1,2 +1,1 @@
-package demo
-
+package main
