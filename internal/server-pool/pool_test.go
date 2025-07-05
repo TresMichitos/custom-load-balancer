@@ -1,4 +1,4 @@
-// Tests for server.go
+// Tests for pool.go
 
 package serverpool
 
@@ -11,17 +11,12 @@ import (
 func TestServerPoolFunctionality (t *testing.T) {
 
 	// Initialise server pool
-	var urls [3]string = [3]string {
+	var urls []string = []string {
 		"http://localhost:8081",
 		"http://localhost:8082",
 		"http://localhost:8083",
 	}
-	var serverPool ServerPool = ServerPool{}
-	for _, url := range urls {
-		serverPool.mu.Lock()
-		serverPool.Pool = append(serverPool.Pool, NewServerNode(url))
-		serverPool.mu.Unlock()
-	}
+	var serverPool *ServerPool = NewServerPool(urls)
 
 	// Use each server node to forward HTTP request
 	for _, serverNode := range serverPool.Pool {	

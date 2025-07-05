@@ -23,7 +23,7 @@ Custom implementation of a load balancer using Go.
 
 Run with:
   ```
-  go run ./cmd/custom-load-balancer/
+  go run ./cmd/custom-load-balancer/ --algorithm {'RoundRobin'|...}
   ```
 
 Can send requests to load balancer with:
