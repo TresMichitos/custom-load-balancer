@@ -89,6 +89,12 @@ Can send requests to load balancer with:
 ├── demo/                                # Simulate usage of the LB
 │   ├── client.go                        # Send client packets
 │   └── server.go                        # Simple server template
+├── docker/                              # Contains all files retaining to the docker image and compose
+│   ├── node_modules/                    
+│   ├── .dockerignore                    # Similar to .gitignore, outlines files for the docker container to ignore
+│   ├── Dockerfile                       # Script for automating the building of the docker image
+│   ├── package-lock.json                
+│   └── package.json                      
 ├── servers.conf                         # Server list (file type tbd)                           
 ├── go.mod                               # Go module definition (tracks dependencies and package name) 
 └── README.MD                            # ...
