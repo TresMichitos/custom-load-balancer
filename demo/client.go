@@ -42,13 +42,16 @@ func main() {
 
 	client := http.Client{Timeout: TIMEOUT * time.Second}
 
+	// Request loop
 	for i := 1; i <= count; i++ {
+		// Send GET request to URL
 		resp, err := client.Get(url)
 		if err != nil {
 			fmt.Printf("[%2d]: %v\n", i, err)
 			continue
 		}
 
+		// Decode response body as `reply` struct
 		var r reply
 		if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
 			fmt.Printf("[%2d]: Decode error: %v\n", i, err)
@@ -57,6 +60,7 @@ func main() {
 		}
 		resp.Body.Close()
 
+		// Log and interval
 		fmt.Printf("[%2d]: host=%s port=%s ts=%s\n", i, r.Hostname, r.Port, r.Timestamp)
 		time.Sleep(INTERVAL * time.Millisecond)
 	}
