@@ -3,10 +3,30 @@
 package main
 
 import (
-	"github.com/TresMichitos/custom-load-balancer/internal/lb-algorithms"
-	"github.com/TresMichitos/custom-load-balancer/internal/server-pool"
+	"encoding/json"
 	"flag"
+	"log"
+	"os"
+
+	lbalgorithms "github.com/TresMichitos/custom-load-balancer/internal/lb-algorithms"
+	serverpool "github.com/TresMichitos/custom-load-balancer/internal/server-pool"
 )
+
+func parse_addresses() ([]string, error) {
+	var address_arr []string
+
+	b, err := os.ReadFile("servers.json")
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	if err := json.Unmarshal(b, &address_arr); err != nil {
+		return nil, err
+	}
+
+	return address_arr, nil
+}
 
 // Initialise load balancer server with configured urls and algorithm parameter
 func main() {
@@ -20,18 +40,15 @@ func main() {
 	var lbAlgorithm serverpool.LbAlgorithm
 
 	switch *lbAlgorithmChoice {
-		default:
-			lbAlgorithm = &lbalgorithms.RoundRobin{}
+	default:
+		lbAlgorithm = &lbalgorithms.RoundRobin{}
 	}
 
-	// TODO: Load urls from config file
-	var urls []string = []string {
-		"http://localhost:8081",
-		"http://localhost:8082",
-		"http://localhost:8083",
+	urls, err := parse_addresses()
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	var server serverpool.Server = serverpool.Server{ServerPool: serverpool.NewServerPool(urls), LbAlgorithm: lbAlgorithm}
 	server.StartLoadBalancer()
 }
-
