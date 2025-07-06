@@ -44,7 +44,9 @@ func main() {
 	case "RoundRobin":
 		lbAlgorithm = &lbalgorithms.RoundRobin{}
 	case "WeightedRoundRobin":
-		lbAlgorithm = &lbalgorithms.WeightedRoundRobin{WeightRatio: []int {1, 2, 1}}
+		lbAlgorithm = &lbalgorithms.WeightedRoundRobin{WeightRatio: []int{1, 2, 1}}
+	case "IpHashing":
+		lbAlgorithm = &lbalgorithms.IpHashing{}
 	default:
 		lbAlgorithm = &lbalgorithms.RoundRobin{}
 	}
