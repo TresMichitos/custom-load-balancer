@@ -41,6 +41,10 @@ func main() {
 	var lbAlgorithm serverpool.LbAlgorithm
 
 	switch *lbAlgorithmChoice {
+	case "RoundRobin":
+		lbAlgorithm = &lbalgorithms.RoundRobin{}
+	case "WeightedRoundRobin":
+		lbAlgorithm = &lbalgorithms.WeightedRoundRobin{WeightRatio: []int {1, 2, 1}}
 	default:
 		lbAlgorithm = &lbalgorithms.RoundRobin{}
 	}
