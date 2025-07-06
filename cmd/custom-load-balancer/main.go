@@ -42,11 +42,11 @@ func main() {
 
 	switch *lbAlgorithmChoice {
 	case "RoundRobin":
-		lbAlgorithm = &lbalgorithms.RoundRobin{}
+		lbAlgorithm = lbalgorithms.NewRoundRobin()
 	case "WeightedRoundRobin":
-		lbAlgorithm = &lbalgorithms.WeightedRoundRobin{WeightRatio: []int {1, 2, 1}}
+		lbAlgorithm = lbalgorithms.NewWeightedRoundRobin([]int {1, 2, 1})
 	default:
-		lbAlgorithm = &lbalgorithms.RoundRobin{}
+		lbAlgorithm = lbalgorithms.NewRoundRobin()
 	}
 
 	urls, err := parse_addresses()

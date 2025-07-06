@@ -9,7 +9,7 @@ import (
 
 // Test that algorithm returns expected server nodes
 func TestRoundRobin (t *testing.T) {
-	var lbAlgorithm serverpool.LbAlgorithm = &RoundRobin{}
+	var lbAlgorithm serverpool.LbAlgorithm = NewRoundRobin()
 
 	// For Round Robin this is also the expected order output
 	var urls []string = []string {

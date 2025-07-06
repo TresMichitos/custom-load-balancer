@@ -9,7 +9,7 @@ import (
 
 // Test that algorithm returns expected server nodes
 func TestWeightedRoundRobin (t *testing.T) {
-	var lbAlgorithm serverpool.LbAlgorithm = &WeightedRoundRobin{WeightRatio: []int {1, 2, 1}}
+	var lbAlgorithm serverpool.LbAlgorithm = NewWeightedRoundRobin([]int {1, 2, 1})
 
 	var urls []string = []string {
 		"http://localhost:8081",
