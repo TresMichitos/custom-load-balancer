@@ -5,10 +5,9 @@ services:
       dockerfile: docker/Dockerfile.loadbalancer
     ports:
       - "8080:8080"
-    environment:
-      - PORT=8080
-      - ALGORITHM=RoundRobin
-      - SERVERS_FILE=/usr/local/bin/servers.json
+    volumes:
+      - ./servers.json:/usr/local/bin/servers.json
+    command: ["--algorithm", "RoundRobin"]
     depends_on:
       - server1
       - server2
