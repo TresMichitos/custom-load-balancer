@@ -49,6 +49,28 @@ Shut down containers with:
 
 ## Development
 
+### Testing:
+
+Run Unit Tests with:
+  ```
+  go test ./internal/...
+  ```
+
+Run Integration Tests with:
+
+1. Start Docker Containers with:
+   ```
+   sudo docker compose up
+   ```
+2. Run Integration Tests with:
+   ```
+   go test ./integration/...
+   ```
+3. Stop Docker Containers with: 
+   ```
+   sudo docker compose down
+   ```
+
 ### Goals
 
 - Use algorithm to route HTTP requests between multiple servers
@@ -68,7 +90,7 @@ Shut down containers with:
 - [Docker Example](https://docs.docker.com/get-started/workshop/02_our_app/)
 - [How Docker Compose works](https://docs.docker.com/compose/intro/compose-application-model/)
 
-### Docker Resources
+#### Docker Resources
 
 - [Setup](https://medium.com/@aedemirsen/load-balancing-with-nginx-c1f19840e29)
 - [Docker Containers](https://medium.com/@aedemirsen/load-balancing-with-docker-compose-and-nginx-b9077696f624)
