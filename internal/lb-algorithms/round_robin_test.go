@@ -7,9 +7,11 @@ import (
 	"testing"
 )
 
-func TestNothing (t *testing.T) {
+// Test that algorithm returns expected server nodes
+func TestRoundRobin (t *testing.T) {
 	var lbAlgorithm serverpool.LbAlgorithm = &RoundRobin{}
 
+	// For Round Robin this is also the expected order output
 	var urls []string = []string {
 		"http://localhost:8081",
 		"http://localhost:8082",

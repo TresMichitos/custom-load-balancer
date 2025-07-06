@@ -23,13 +23,6 @@ func TestServerPoolFunctionality (t *testing.T) {
 		r := httptest.NewRequest("GET", "http://localhost:8080", nil)
 		w := httptest.NewRecorder()
 		serverNode.ForwardRequest(w, r)
-		/*
-		response := w.Result()
-
-		if response.StatusCode != 200 {
-			t.Errorf("Status Code was %d, expected 200", response.StatusCode)
-		}
-		*/
 	}
 }
 
