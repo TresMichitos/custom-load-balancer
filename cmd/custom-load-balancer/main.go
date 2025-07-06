@@ -12,6 +12,7 @@ import (
 	serverpool "github.com/TresMichitos/custom-load-balancer/internal/server-pool"
 )
 
+// Load urls from servers.json
 func parse_addresses() ([]string, error) {
 	var address_arr []string
 
