@@ -1,5 +1,7 @@
 [![tests](https://github.com/TresMichitos/custom-load-balancer/actions/workflows/tests.yml/badge.svg)](https://github.com/TresMichitos/custom-load-balancer/actions/workflows/tests.yml)
 [![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=for-the-badge&logo=go&logoColor=white)](https://go.dev/)
+[Docker Desktop](https://www.docker.com/products/docker-desktop/) (for Windows/Mac)
+[Docker Compose](https://docs.docker.com/compose/install/) (v2 or above)
 
 # Custom Load Balancer Using Go
 
@@ -25,10 +27,23 @@ Run with:
   ```
   go run ./cmd/custom-load-balancer/ --algorithm {'RoundRobin'|...}
   ```
+Or:
+  ```
+  docker compose up --build
+  ```
 
 Can send requests to load balancer with:
   ```
   curl http://localhost:8080
+  ```
+Or:
+  ```
+  go run demo/client/client.go http://localhost:8080 15
+  ```
+
+Shut down containers with:
+  ```
+  docker run compose down
   ```
 
 ---
@@ -89,12 +104,12 @@ Can send requests to load balancer with:
 ├── demo/                                # Simulate usage of the LB
 │   ├── client.go                        # Send client packets
 │   └── server.go                        # Simple server template
-├── docker/                              # Contains all files retaining to the docker image and compose
-│   ├── .dockerignore                    # Similar to .gitignore, outlines files for the docker container to ignore
-│   ├── Dockerfile                       # Script for automating the building of the docker image
-│   ├── package-lock.json                
-│   └── package.json                      
-├── servers.conf                         # Server list (file type tbd)                           
+├── docker/                              # Contains all files retaining to the docker image and containers
+│   ├── Dockerfile.loadbalancer          # Builds binary image for main.go
+│   └── Dockerfile.server                # Builds binary image for server.go                      
+├── servers.json                         # Server list (file type tbd)                           
+├── .dockerignore                        # Similar to .gitignore, outlines files for the docker container to ignore
+├── compose.yml                          # File used for building the docker containers and describing how they should interact with each other
 ├── go.mod                               # Go module definition (tracks dependencies and package name) 
 └── README.MD                            # ...
 ```
