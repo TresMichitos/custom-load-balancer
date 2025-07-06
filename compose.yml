@@ -1,0 +1,56 @@
+services:
+  custom-load-balancer:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.loadbalancer
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - ALGORITHM=RoundRobin
+      - SERVERS_FILE=/usr/local/bin/servers.json
+    depends_on:
+      - server1
+      - server2
+      - server3
+    networks:
+      - lb-network
+
+  server1:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.server
+    environment:
+      - PORT=8081
+      - SERVER_ID=1
+    ports:
+      - "8081:8081"
+    networks:
+      - lb-network
+
+  server2:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.server
+    environment:
+      - PORT=8082
+      - SERVER_ID=2
+    ports:
+      - "8082:8082"
+    networks:
+      - lb-network
+
+  server3:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.server
+    environment:
+      - PORT=8083
+      - SERVER_ID=3
+    ports:
+      - "8083:8083"
+    networks:
+      - lb-network
+networks:
+  lb-network:
+    driver: bridge
