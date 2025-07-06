@@ -19,7 +19,7 @@ var listenPort string
 func handler(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	hostname := os.Getenv("HOSTNAME")
+	hostname := os.Getenv("SERVER_ID")
 	if hostname == "" {
 		if h, err := os.Hostname(); err == nil {
 			hostname = h

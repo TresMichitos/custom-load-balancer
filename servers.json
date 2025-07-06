@@ -1,5 +1,5 @@
 [
-    "http://localhost:8081",
-    "http://localhost:8082",
-    "http://localhost:8083"
+    "http://server1:8081",
+    "http://server2:8082",
+    "http://server3:8083"
 ]
