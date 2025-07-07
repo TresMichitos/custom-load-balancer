@@ -14,6 +14,8 @@ type reply struct {
 	Timestamp string `json:"timestamp"`
 }
 
+const SIMULATED_LATENCY = -1
+
 var listenPort string
 
 func handler(w http.ResponseWriter, _ *http.Request) {
@@ -25,6 +27,8 @@ func handler(w http.ResponseWriter, _ *http.Request) {
 			hostname = h
 		}
 	}
+
+	time.Sleep(SIMULATED_LATENCY * time.Millisecond)
 
 	_ = json.NewEncoder(w).Encode(reply{
 		Hostname:  hostname,
