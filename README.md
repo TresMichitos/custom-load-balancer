@@ -8,7 +8,7 @@ Custom implementation of a load balancer using Go.
 
 ## Installation
 
-1. Download the Repository with:
+1. Download the repository with:
 
    - ```
      git clone https://github.com/TresMichitos/custom-load-balancer.git
