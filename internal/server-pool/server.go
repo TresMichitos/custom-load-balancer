@@ -8,23 +8,22 @@ import (
 
 // Interface for load balancing algorithms
 type LbAlgorithm interface {
-	NextServerNode (*ServerPool) *ServerNode
+	NextServerNode(*ServerPool) *ServerNode
 }
 
 // Struct to represent load balancer server
 type Server struct {
-	ServerPool *ServerPool
+	ServerPool  *ServerPool
 	LbAlgorithm LbAlgorithm
 }
 
 // Handler function to route HTTP request using balancing algorithm
-func (server *Server) requestHandler (w http.ResponseWriter, r *http.Request) {
+func (server *Server) requestHandler(w http.ResponseWriter, r *http.Request) {
 	var nextServerNode *ServerNode = server.LbAlgorithm.NextServerNode(server.ServerPool)
 	nextServerNode.ForwardRequest(w, r)
 }
 
-func (server *Server) StartLoadBalancer () {
+func (server *Server) StartLoadBalancer() {
 	http.HandleFunc("/", server.requestHandler)
 	http.ListenAndServe(":8080", nil)
 }
-
