@@ -42,7 +42,7 @@ Or:
 
 Shut down containers with:
   ```
-  docker run compose down
+  docker compose down
   ```
 
 ---
