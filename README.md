@@ -1,6 +1,6 @@
 [![tests](https://github.com/TresMichitos/custom-load-balancer/actions/workflows/tests.yml/badge.svg)](https://github.com/TresMichitos/custom-load-balancer/actions/workflows/tests.yml)
 [![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=for-the-badge&logo=go&logoColor=white)](https://go.dev/)
-![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+[![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 
 # Custom Load Balancer Using Go
 
@@ -8,7 +8,7 @@ Custom implementation of a load balancer using Go.
 
 ## Installation
 
-1. Download the Repository with:
+1. Download the repository with:
 
    - ```
      git clone https://github.com/TresMichitos/custom-load-balancer.git
@@ -42,7 +42,7 @@ Or:
 
 Shut down containers with:
   ```
-  docker run compose down
+  docker compose down
   ```
 
 ---

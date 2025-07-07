@@ -7,12 +7,16 @@ import (
 )
 
 // Struct to implement serverpool.LbAlgorithm interface
-type RoundRobin struct {
+type roundRobin struct {
 	index int
 }
 
+func NewRoundRobin () *roundRobin {
+	return &roundRobin{}
+}
+
 // Select server node by iterating over server pool
-func (roundRobin *RoundRobin) NextServerNode (serverPool *serverpool.ServerPool) *serverpool.ServerNode {
+func (roundRobin *roundRobin) NextServerNode (serverPool *serverpool.ServerPool) *serverpool.ServerNode {
 	defer func () {roundRobin.index ++} ()
 
 	if roundRobin.index >= len(serverPool.Pool) {
