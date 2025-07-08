@@ -3,6 +3,8 @@
 package serverpool
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -17,6 +19,45 @@ type Server struct {
 	LbAlgorithm LbAlgorithm
 }
 
+// Struct to represent JSON serverNodeMetrics object
+type ServerNodeMetrics struct {
+	URL string `json:"url"`
+	RequestCount int `json:"requestCount"`
+}
+
+// Struct to represent JSON Metrics object
+type Metrics struct {
+	AverageLatency string `json:"averageLatency"`
+	ServerNodesMetrics []ServerNodeMetrics `json:"serverNodesMetrics"`
+}
+
+func newMetrics (serverPool *ServerPool) *Metrics {
+	serverPool.mu.Lock()
+	defer serverPool.mu.Unlock()
+
+	var metrics = Metrics{}
+	var totalLatency int = 0
+
+	for _, serverNode := range serverPool.Pool {
+		serverNode.mu.Lock()
+		totalLatency += serverNode.Latency
+		metrics.ServerNodesMetrics = append(metrics.ServerNodesMetrics, ServerNodeMetrics{
+																			serverNode.URL,
+																			serverNode.RequestCount})
+		serverNode.mu.Unlock()
+	}
+
+	metrics.AverageLatency = fmt.Sprintf("%dms", totalLatency / len(serverPool.Pool))
+
+	return &metrics
+}
+
+// Handler function to provide load balancer metrics
+func (server *Server) metricsHandler(w http.ResponseWriter, r *http.Request) {
+	var metrics Metrics = *newMetrics(server.ServerPool)
+	json.NewEncoder(w).Encode(metrics)
+}
+
 // Handler function to route HTTP request using balancing algorithm
 func (server *Server) requestHandler(w http.ResponseWriter, r *http.Request) {
 	var nextServerNode *ServerNode = server.LbAlgorithm.NextServerNode(server.ServerPool)
@@ -25,5 +66,6 @@ func (server *Server) requestHandler(w http.ResponseWriter, r *http.Request) {
 
 func (server *Server) StartLoadBalancer() {
 	http.HandleFunc("/", server.requestHandler)
+	http.HandleFunc("/metrics", server.metricsHandler)
 	http.ListenAndServe(":8080", nil)
 }
