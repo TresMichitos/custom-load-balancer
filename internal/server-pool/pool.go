@@ -9,6 +9,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"sync"
+	"time"
 )
 
 // Struct to represent each node server we forward to
@@ -16,6 +17,8 @@ type ServerNode struct {
 	URL               string
 	ReverseProxy      *httputil.ReverseProxy
 	ActiveConnections int
+	RequestCount int
+	Latency int
 	mu                sync.Mutex
 }
 
@@ -30,8 +33,14 @@ func NewServerNode(urlInput string) (*ServerNode, error) {
 
 // Proxy function to forward HTTP request to server node
 func (serverNode *ServerNode) ForwardRequest(w http.ResponseWriter, r *http.Request) {
+	serverNode.mu.Lock()
+	defer serverNode.mu.Unlock()
+
 	serverNode.ActiveConnections += 1
+	serverNode.RequestCount ++
+	startTime := time.Now()
 	serverNode.ReverseProxy.ServeHTTP(w, r)
+	serverNode.Latency = int(time.Since(startTime).Milliseconds())
 	serverNode.ActiveConnections -= 1
 }
 
@@ -54,3 +63,4 @@ func NewServerPool(urls []string) *ServerPool {
 	}
 	return &serverPool
 }
+
