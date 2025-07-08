@@ -1,4 +1,6 @@
 /*
+ * Utility for simulating a client making requests.
+ * Uses TEST-NET-3 IPv4 range.
  * Usage:
  * 		go run client.go <url>			# Single request
  *		go run client.go <url> <count>	# <count> requests
@@ -9,10 +11,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
+
+	ipgen "github.com/TresMichitos/custom-load-balancer/demo/client/ipgen"
 )
 
 type reply struct {
@@ -25,43 +30,63 @@ const TIMEOUT = 5    // Timeout in seconds
 const INTERVAL = 300 // Interval between requests in ms
 
 func main() {
-	// Target URL
-	if len(os.Args) < 2 {
-		fmt.Fprintf(os.Stderr, "Usage: %s <url> <count>\n", os.Args[0])
-		os.Exit(1)
-	}
-	url := os.Args[1]
-
-	// Number of requests
-	count := 1
-	if len(os.Args) > 2 {
-		if n, err := strconv.Atoi(os.Args[2]); err == nil && n > 0 {
-			count = n
-		}
+	var url, count, err = readArgs()
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	client := http.Client{Timeout: TIMEOUT * time.Second}
+	ip := ipgen.GenTestNet3()
 
 	// Request loop
 	for i := 1; i <= count; i++ {
-		// Send GET request to URL
-		resp, err := client.Get(url)
+		// Build req
+		req, err := http.NewRequest(http.MethodGet, url, nil)
 		if err != nil {
-			fmt.Printf("[%2d]: %v\n", i, err)
+			fmt.Printf("[%02d] build-req error: %v\n", i, err)
+			continue
+		}
+		req.Header.Set("X-Forwarded-For", ip)
+
+		// Send req
+		resp, err := client.Do(req)
+		if err != nil {
+			fmt.Printf("[%02d] request error: %v\n", i, err)
 			continue
 		}
 
-		// Decode response body as `reply` struct
+		// Parse response
 		var r reply
 		if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
-			fmt.Printf("[%2d]: Decode error: %v\n", i, err)
+			fmt.Printf("[%02d]: Decode error: %v\n", i, err)
 			resp.Body.Close()
 			continue
 		}
 		resp.Body.Close()
 
 		// Log and interval
-		fmt.Printf("[%2d]: host=%s port=%s ts=%s\n", i, r.Hostname, r.Port, r.Timestamp)
+		fmt.Printf("[%02d]: host=%s port=%s ts=%s\n", i, r.Hostname, r.Port, r.Timestamp)
 		time.Sleep(INTERVAL * time.Millisecond)
 	}
+}
+
+func readArgs() (string, int, error) {
+	// URL
+	if len(os.Args) < 2 {
+		return "", 0, fmt.Errorf("usage: %s <url> <count>", os.Args[0])
+	}
+
+	url := os.Args[1]
+
+	// Request count
+	count := 1
+	if len(os.Args) > 2 {
+		n, err := strconv.Atoi(os.Args[2])
+		if err != nil || n <= 0 {
+			return "", 0, fmt.Errorf("invalid count: %s", os.Args[2])
+		}
+		count = n
+	}
+
+	return url, count, nil
 }
