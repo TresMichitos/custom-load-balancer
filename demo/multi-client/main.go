@@ -2,9 +2,9 @@
  * Utility for simulating a client making requests.
  * Uses TEST-NET-3 IPv4 range.
  * Usage:
- * 		go run client.go <url> 										# Single request
- * 		go run client.go <url> <request count>						# Multiple requests
- * 		go run client.go <url> <request count> <client clount>		# Multiple requests & clients
+ * 		go run main.go <url> 										# Single request
+ * 		go run main.go <url> <request count>						# Multiple requests
+ * 		go run main.go <url> <request count> <client clount>		# Multiple requests & clients
  */
 
 package main
@@ -67,7 +67,7 @@ func readArgs() (string, int, int, error) {
 	if len(os.Args) > 3 {
 		n, err := strconv.Atoi(os.Args[3])
 		if err != nil || n <= 0 {
-			return "", 0, 0, fmt.Errorf("invalid client count: %s", os.Args[2])
+			return "", 0, 0, fmt.Errorf("invalid client count: %s", os.Args[3])
 		}
 		clientCount = n
 	}
