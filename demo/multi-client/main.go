@@ -12,17 +12,15 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"strconv"
 	"sync"
-	"time"
 
 	client "github.com/TresMichitos/custom-load-balancer/demo/multi-client/client"
 )
 
-const TIMEOUT = 5    // Timeout in seconds
-const INTERVAL = 300 // Interval between requests in ms
+const TIMEOUT = 5     // Timeout in seconds
+const INTERVAL = 1000 // Interval between requests in ms
 
 func main() {
 	var url, requestCount, clientCount, err = readArgs()
@@ -30,15 +28,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	httpClient := http.Client{Timeout: TIMEOUT * time.Second}
-
 	var wg sync.WaitGroup
 
 	for i := 1; i <= clientCount; i++ {
 		wg.Add(1)
 		go func(clientID int) {
 			defer wg.Done()
-			client.SimulateClient(httpClient, url, requestCount, INTERVAL, i)
+			client.SimulateClient(TIMEOUT, url, requestCount, INTERVAL, i)
 		}(i)
 	}
 

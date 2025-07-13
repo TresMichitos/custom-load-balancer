@@ -15,7 +15,8 @@ type reply struct {
 	Timestamp string `json:"timestamp"`
 }
 
-func SimulateClient(client http.Client, url string, requestCount int, INTERVAL int, clientID int) {
+func SimulateClient(TIMEOUT int, url string, requestCount int, INTERVAL int, clientID int) {
+	httpClient := http.Client{Timeout: time.Duration(TIMEOUT) * time.Second}
 	ip := ipgen.GenTestNet3()
 
 	for i := 1; i <= requestCount; i++ {
@@ -28,7 +29,7 @@ func SimulateClient(client http.Client, url string, requestCount int, INTERVAL i
 		req.Header.Set("X-Forwarded-For", ip)
 
 		// Send req
-		resp, err := client.Do(req)
+		resp, err := httpClient.Do(req)
 		if err != nil {
 			fmt.Printf("[%02d] request error: %v\n", i, err)
 			continue
@@ -44,7 +45,8 @@ func SimulateClient(client http.Client, url string, requestCount int, INTERVAL i
 		resp.Body.Close()
 
 		// Log and interval
-		fmt.Printf("[Client %02d - %02d]: host=%s port=%s ts=%s\n", clientID, i, r.Hostname, r.Port, r.Timestamp)
+		fmt.Printf("[%s] [Client %02d - %02d]: host=%s port=%s ts=%s\n",
+			time.Now().Format("15:04:05"), clientID, i, r.Hostname, r.Port, r.Timestamp)
 		time.Sleep(time.Duration(INTERVAL) * time.Millisecond)
 	}
 }
