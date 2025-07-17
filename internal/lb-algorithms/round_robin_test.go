@@ -18,6 +18,7 @@ func TestRoundRobin (t *testing.T) {
 		"http://localhost:8083",
 	}
 	var serverPool *serverpool.ServerPool = serverpool.NewServerPool(urls)
+	serverPool.Healthy = serverPool.Unhealthy
 	
 	for _, url := range urls {
 		var nextServerNode *serverpool.ServerNode = lbAlgorithm.NextServerNode(serverPool)
