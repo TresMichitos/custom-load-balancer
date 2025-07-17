@@ -14,7 +14,7 @@ type reply struct {
 	Timestamp string `json:"timestamp"`
 }
 
-const SIMULATED_LATENCY = 6000
+const SIMULATED_LATENCY = -1 // In milliseconds
 
 var listenPort string
 
