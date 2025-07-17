@@ -60,7 +60,7 @@ func NewServerPool(urls []string) *ServerPool {
 			fmt.Println(err)
 			continue
 		}
-		serverPool.Healthy = append(serverPool.Healthy, newServerNode)
+		serverPool.Unhealthy = append(serverPool.Unhealthy, newServerNode)
 	}
 	return &serverPool
 }

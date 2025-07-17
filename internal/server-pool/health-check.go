@@ -10,29 +10,38 @@ import (
 	"time"
 )
 
-const TIMEOUT = 5 // Timeout in seconds
+const TIMEOUT = 5  // Timeout in seconds
+const INTERVAL = 5 // Health check interval
 
-func EvalServerPool(pool []*ServerNode, endpoint string) ([]*ServerNode, []*ServerNode) {
-	healthyPool := []*ServerNode{}
-	unhealthyPool := []*ServerNode{}
+func HealthCheckLoop(serverPool *ServerPool) {
+	for {
+		healthyPool := []*ServerNode{}
+		unhealthyPool := []*ServerNode{}
 
-	for _, serverNode := range pool {
-		isHealthy := checkServerHealth(serverNode, endpoint)
+		pool := append(serverPool.Healthy, serverPool.Unhealthy...)
 
-		if isHealthy {
-			healthyPool = append(healthyPool, serverNode)
-		} else {
-			unhealthyPool = append(unhealthyPool, serverNode)
+		for _, serverNode := range pool {
+			isHealthy := checkServerHealth(serverNode)
+
+			if isHealthy {
+				healthyPool = append(healthyPool, serverNode)
+			} else {
+				unhealthyPool = append(unhealthyPool, serverNode)
+			}
 		}
-	}
 
-	return healthyPool, unhealthyPool
+		serverPool.mu.Lock()
+		serverPool.Healthy, serverPool.Unhealthy = healthyPool, unhealthyPool
+		serverPool.mu.Unlock()
+
+		time.Sleep(INTERVAL * time.Second)
+	}
 }
 
-func checkServerHealth(server *ServerNode, endpoint string) bool {
+func checkServerHealth(server *ServerNode) bool {
 	httpClient := http.Client{Timeout: TIMEOUT * time.Second}
 
-	req, err := http.NewRequest(http.MethodGet, server.URL+endpoint, nil)
+	req, err := http.NewRequest(http.MethodGet, server.URL, nil)
 	if err != nil {
 		fmt.Printf("[%v] build-req error: %v\n", server.URL, err)
 		return false
@@ -46,6 +55,7 @@ func checkServerHealth(server *ServerNode, endpoint string) bool {
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+		fmt.Printf("[%v] healthy status code: %d\n", server.URL, resp.StatusCode)
 		return true
 	}
 	fmt.Printf("[%v] unhealthy status code: %d\n", server.URL, resp.StatusCode)
