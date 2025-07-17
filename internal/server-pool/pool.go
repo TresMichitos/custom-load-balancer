@@ -17,8 +17,8 @@ type ServerNode struct {
 	URL               string
 	ReverseProxy      *httputil.ReverseProxy
 	ActiveConnections int
-	RequestCount int
-	Latency int
+	RequestCount      int
+	Latency           int
 	mu                sync.Mutex
 }
 
@@ -37,7 +37,7 @@ func (serverNode *ServerNode) ForwardRequest(w http.ResponseWriter, r *http.Requ
 	defer serverNode.mu.Unlock()
 
 	serverNode.ActiveConnections += 1
-	serverNode.RequestCount ++
+	serverNode.RequestCount++
 	startTime := time.Now()
 	serverNode.ReverseProxy.ServeHTTP(w, r)
 	serverNode.Latency = int(time.Since(startTime).Milliseconds())
@@ -46,8 +46,9 @@ func (serverNode *ServerNode) ForwardRequest(w http.ResponseWriter, r *http.Requ
 
 // Struct to contain collection of server nodes
 type ServerPool struct {
-	Pool []*ServerNode
-	mu   sync.Mutex
+	Healthy   []*ServerNode
+	Unhealthy []*ServerNode
+	mu        sync.Mutex
 }
 
 // Factory function to initialise a new ServerPool object
@@ -59,8 +60,7 @@ func NewServerPool(urls []string) *ServerPool {
 			fmt.Println(err)
 			continue
 		}
-		serverPool.Pool = append(serverPool.Pool, newServerNode)
+		serverPool.Healthy = append(serverPool.Healthy, newServerNode)
 	}
 	return &serverPool
 }
-

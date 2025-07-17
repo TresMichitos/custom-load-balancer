@@ -21,33 +21,33 @@ type Server struct {
 
 // Struct to represent JSON serverNodeMetrics object
 type ServerNodeMetrics struct {
-	URL string `json:"url"`
-	RequestCount int `json:"requestCount"`
+	URL          string `json:"url"`
+	RequestCount int    `json:"requestCount"`
 }
 
 // Struct to represent JSON Metrics object
 type Metrics struct {
-	AverageLatency string `json:"averageLatency"`
+	AverageLatency     string              `json:"averageLatency"`
 	ServerNodesMetrics []ServerNodeMetrics `json:"serverNodesMetrics"`
 }
 
-func newMetrics (serverPool *ServerPool) *Metrics {
+func newMetrics(serverPool *ServerPool) *Metrics {
 	serverPool.mu.Lock()
 	defer serverPool.mu.Unlock()
 
 	var metrics = Metrics{}
 	var totalLatency int = 0
 
-	for _, serverNode := range serverPool.Pool {
+	for _, serverNode := range serverPool.Healthy {
 		serverNode.mu.Lock()
 		totalLatency += serverNode.Latency
 		metrics.ServerNodesMetrics = append(metrics.ServerNodesMetrics, ServerNodeMetrics{
-																			serverNode.URL,
-																			serverNode.RequestCount})
+			serverNode.URL,
+			serverNode.RequestCount})
 		serverNode.mu.Unlock()
 	}
 
-	metrics.AverageLatency = fmt.Sprintf("%dms", totalLatency / len(serverPool.Pool))
+	metrics.AverageLatency = fmt.Sprintf("%dms", totalLatency/len(serverPool.Healthy))
 
 	return &metrics
 }
