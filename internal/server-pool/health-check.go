@@ -16,17 +16,39 @@ const INTERVAL = 5 // Health check interval
 
 func HealthCheckLoop(serverPool *ServerPool) {
 	for {
-		healthyPool := []*ServerNode{}
-		unhealthyPool := []*ServerNode{}
-
 		pool := append(serverPool.Healthy, serverPool.Unhealthy...)
+
+		healthyCh := make(chan *ServerNode, len(pool))
+		unhealthyCh := make(chan *ServerNode, len(pool))
 
 		var wg sync.WaitGroup
 		for _, serverNode := range pool {
 			wg.Add(1)
-			go sortServer(serverNode, &healthyPool, &unhealthyPool, &wg)
+			go func(server *ServerNode) {
+				defer wg.Done()
+				if isServerHealthy(server) {
+					healthyCh <- server
+				} else {
+					unhealthyCh <- server
+				}
+			}(serverNode)
 		}
-		wg.Wait()
+
+		go func() {
+			wg.Wait()
+			close(healthyCh)
+			close(unhealthyCh)
+		}()
+
+		healthyPool := []*ServerNode{}
+		unhealthyPool := []*ServerNode{}
+
+		for node := range healthyCh {
+			healthyPool = append(healthyPool, node)
+		}
+		for node := range unhealthyCh {
+			unhealthyPool = append(unhealthyPool, node)
+		}
 
 		serverPool.mu.Lock()
 		serverPool.Healthy, serverPool.Unhealthy = healthyPool, unhealthyPool
@@ -34,18 +56,6 @@ func HealthCheckLoop(serverPool *ServerPool) {
 
 		time.Sleep(INTERVAL * time.Second)
 	}
-}
-
-func sortServer(server *ServerNode, healthyPool *[]*ServerNode, unhealthyPool *[]*ServerNode, wg *sync.WaitGroup) {
-	isHealthy := isServerHealthy(server)
-
-	if isHealthy {
-		*healthyPool = append(*healthyPool, server)
-	} else {
-		*unhealthyPool = append(*unhealthyPool, server)
-	}
-
-	defer wg.Done()
 }
 
 func isServerHealthy(server *ServerNode) bool {
