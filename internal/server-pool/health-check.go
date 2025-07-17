@@ -49,5 +49,5 @@ func checkServerHealth(server *ServerNode, endpoint string) bool {
 		return true
 	}
 	fmt.Printf("[%v] unhealthy status code: %d\n", server.URL, resp.StatusCode)
-	return true
+	return false
 }
