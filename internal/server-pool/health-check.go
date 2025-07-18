@@ -17,13 +17,18 @@ const INTERVAL = 5 // Health check interval
 func HealthCheckLoop(serverPool *ServerPool) {
 	for {
 		healthMap := make(map[*ServerNode]bool)
+		var mapMu sync.Mutex
 
 		var wg sync.WaitGroup
 		for _, serverNode := range serverPool.All {
 			wg.Add(1)
 			go func(server *ServerNode) {
 				defer wg.Done()
-				healthMap[server] = isServerHealthy(server)
+				healthy := isServerHealthy(server)
+
+				mapMu.Lock()
+				healthMap[server] = healthy
+				mapMu.Unlock()
 			}(serverNode)
 		}
 
