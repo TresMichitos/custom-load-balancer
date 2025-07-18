@@ -3,29 +3,30 @@
 package lbalgorithms
 
 import (
-	"github.com/TresMichitos/custom-load-balancer/internal/server-pool"
 	"testing"
+
+	serverpool "github.com/TresMichitos/custom-load-balancer/internal/server-pool"
 )
 
 // Test that algorithm returns expected server nodes
-func TestWeightedRoundRobin (t *testing.T) {
-	var lbAlgorithm serverpool.LbAlgorithm = NewWeightedRoundRobin([]int {1, 2, 1})
+func TestWeightedRoundRobin(t *testing.T) {
+	var lbAlgorithm serverpool.LbAlgorithm = NewWeightedRoundRobin([]int{1, 2, 1})
 
-	var urls []string = []string {
+	var urls []string = []string{
 		"http://localhost:8081",
 		"http://localhost:8082",
 		"http://localhost:8083",
 	}
 	var serverPool *serverpool.ServerPool = serverpool.NewServerPool(urls)
-	serverPool.Healthy = serverPool.Unhealthy
+	serverPool.Healthy = serverPool.All
 
-	var expectedUrlsRouted []string = []string {
+	var expectedUrlsRouted []string = []string{
 		"http://localhost:8081",
 		"http://localhost:8082",
 		"http://localhost:8082",
 		"http://localhost:8083",
 	}
-	
+
 	for _, url := range expectedUrlsRouted {
 		var nextServerNode *serverpool.ServerNode = lbAlgorithm.NextServerNode(serverPool)
 		if url != nextServerNode.URL {
@@ -33,4 +34,3 @@ func TestWeightedRoundRobin (t *testing.T) {
 		}
 	}
 }
-

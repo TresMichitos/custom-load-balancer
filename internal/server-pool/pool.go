@@ -46,9 +46,9 @@ func (serverNode *ServerNode) ForwardRequest(w http.ResponseWriter, r *http.Requ
 
 // Struct to contain collection of server nodes
 type ServerPool struct {
-	Healthy   []*ServerNode
-	Unhealthy []*ServerNode
-	mu        sync.Mutex
+	All     []*ServerNode
+	Healthy []*ServerNode
+	mu      sync.Mutex
 }
 
 // Factory function to initialise a new ServerPool object
@@ -60,7 +60,7 @@ func NewServerPool(urls []string) *ServerPool {
 			fmt.Println(err)
 			continue
 		}
-		serverPool.Unhealthy = append(serverPool.Unhealthy, newServerNode)
+		serverPool.All = append(serverPool.All, newServerNode)
 	}
 	return &serverPool
 }
