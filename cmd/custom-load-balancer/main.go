@@ -44,7 +44,9 @@ func main() {
 	case "RoundRobin":
 		lbAlgorithm = lbalgorithms.NewRoundRobin()
 	case "WeightedRoundRobin":
-		lbAlgorithm = lbalgorithms.NewWeightedRoundRobin([]int {1, 2, 1})
+		lbAlgorithm = lbalgorithms.NewWeightedRoundRobin([]int{1, 2, 1})
+	case "Random":
+		lbAlgorithm = lbalgorithms.NewRandom()
 	default:
 		lbAlgorithm = lbalgorithms.NewRoundRobin()
 	}
