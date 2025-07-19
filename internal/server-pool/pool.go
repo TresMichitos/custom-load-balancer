@@ -18,8 +18,22 @@ type ServerNode struct {
 	ReverseProxy      *httputil.ReverseProxy
 	ActiveConnections int
 	RequestCount      int
-	Latency           int
+	SuccessCount      int
+	FailureCount      int
+	Latency           int   // Most recent request
+	LatencySamples    []int // Rolling buffer
 	mu                sync.Mutex
+}
+
+// Response writer wrapper
+type responseWriterWrapper struct {
+	http.ResponseWriter
+	status int
+}
+
+func (rw *responseWriterWrapper) WriteHeader(code int) {
+	rw.status = code
+	rw.ResponseWriter.WriteHeader(code)
 }
 
 // Factory function to initialise a new ServerNode object
@@ -33,15 +47,32 @@ func NewServerNode(urlInput string) (*ServerNode, error) {
 
 // Proxy function to forward HTTP request to server node
 func (serverNode *ServerNode) ForwardRequest(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	serverNode.mu.Lock()
+	serverNode.ActiveConnections++
+	serverNode.RequestCount++
+	serverNode.mu.Unlock()
+
+	rww := &responseWriterWrapper{ResponseWriter: w, status: 200}
+	serverNode.ReverseProxy.ServeHTTP(rww, r)
+
+	elapsedTime := int(time.Since(startTime).Milliseconds())
+
 	serverNode.mu.Lock()
 	defer serverNode.mu.Unlock()
+	serverNode.ActiveConnections--
+	serverNode.Latency = elapsedTime
+	serverNode.LatencySamples = append(serverNode.LatencySamples, elapsedTime)
+	if len(serverNode.LatencySamples) > 100 {
+		serverNode.LatencySamples = serverNode.LatencySamples[1:]
+	}
 
-	serverNode.ActiveConnections += 1
-	serverNode.RequestCount++
-	startTime := time.Now()
-	serverNode.ReverseProxy.ServeHTTP(w, r)
-	serverNode.Latency = int(time.Since(startTime).Milliseconds())
-	serverNode.ActiveConnections -= 1
+	if rww.status >= 200 && rww.status < 300 {
+		serverNode.SuccessCount++
+	} else {
+		serverNode.FailureCount++
+	}
 }
 
 // Struct to contain collection of server nodes
