@@ -21,40 +21,75 @@ type Server struct {
 
 // Struct to represent JSON serverNodeMetrics object
 type ServerNodeMetrics struct {
-	URL          string `json:"url"`
-	RequestCount int    `json:"requestCount"`
+	URL            string `json:"url"`
+	RequestCount   int    `json:"requestCount"`
+	SuccessCount   int    `json:"successCount"`
+	FailureCount   int    `json:"failureCount"`
+	AverageLatency string `json:"averageLatency"`
 }
 
 // Struct to represent JSON Metrics object
 type Metrics struct {
-	AverageLatency     string              `json:"averageLatency"`
-	ServerNodesMetrics []ServerNodeMetrics `json:"serverNodesMetrics"`
+	TotalRequests     int                 `json:"totalRequests"`
+	TotalSuccesses    int                 `json:"totalSuccesses"`
+	TotalFailures     int                 `json:"totalFailures"`
+	OverallLatency    string              `json:"overallLatency"`
+	ServerNodeMetrics []ServerNodeMetrics `json:"serverNodeMetrics"`
 }
 
 func newMetrics(serverPool *ServerPool) *Metrics {
+	var metrics Metrics
+	var totalLatency int
+	var totalSamples int
+
 	serverPool.mu.Lock()
 	defer serverPool.mu.Unlock()
 
-	var metrics = Metrics{}
-	var totalLatency int = 0
-
 	for _, serverNode := range serverPool.Healthy {
 		serverNode.mu.Lock()
-		totalLatency += serverNode.Latency
-		metrics.ServerNodesMetrics = append(metrics.ServerNodesMetrics, ServerNodeMetrics{
-			serverNode.URL,
-			serverNode.RequestCount})
+
+		// Node avg latency
+		var avgLatency int
+		sampleCount := len(serverNode.LatencySamples)
+		for _, sample := range serverNode.LatencySamples {
+			avgLatency += sample
+		}
+
+		if sampleCount > 0 {
+			avgLatency /= sampleCount
+			totalSamples++
+			totalLatency += avgLatency
+		}
+
+		// Overall metrics
+		metrics.TotalRequests += serverNode.RequestCount
+		metrics.TotalSuccesses += serverNode.SuccessCount
+		metrics.TotalFailures += serverNode.FailureCount
+
+		metrics.ServerNodeMetrics = append(metrics.ServerNodeMetrics, ServerNodeMetrics{
+			URL:            serverNode.URL,
+			RequestCount:   serverNode.RequestCount,
+			SuccessCount:   serverNode.SuccessCount,
+			FailureCount:   serverNode.FailureCount,
+			AverageLatency: fmt.Sprintf("%dms", avgLatency),
+		})
+
 		serverNode.mu.Unlock()
 	}
 
-	metrics.AverageLatency = fmt.Sprintf("%dms", totalLatency/len(serverPool.Healthy))
+	if totalSamples > 0 {
+		metrics.OverallLatency = fmt.Sprintf("%dms", totalLatency/totalSamples)
+	} else {
+		metrics.OverallLatency = "N/A: no samples"
+	}
 
 	return &metrics
 }
 
 // Handler function to provide load balancer metrics
 func (server *Server) metricsHandler(w http.ResponseWriter, r *http.Request) {
-	var metrics Metrics = *newMetrics(server.ServerPool)
+	metrics := newMetrics(server.ServerPool)
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(metrics)
 }
 

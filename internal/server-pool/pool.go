@@ -49,18 +49,22 @@ func NewServerNode(urlInput string) (*ServerNode, error) {
 func (serverNode *ServerNode) ForwardRequest(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 
+	// Pre-metrics
 	serverNode.mu.Lock()
 	serverNode.ActiveConnections++
 	serverNode.RequestCount++
 	serverNode.mu.Unlock()
 
+	// Forward request
 	rww := &responseWriterWrapper{ResponseWriter: w, status: 200}
 	serverNode.ReverseProxy.ServeHTTP(rww, r)
 
+	// Post-metrics
 	elapsedTime := int(time.Since(startTime).Milliseconds())
 
 	serverNode.mu.Lock()
 	defer serverNode.mu.Unlock()
+
 	serverNode.ActiveConnections--
 	serverNode.Latency = elapsedTime
 	serverNode.LatencySamples = append(serverNode.LatencySamples, elapsedTime)
