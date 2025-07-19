@@ -2,7 +2,10 @@
 
 package lbalgorithms
 
-import serverpool "github.com/TresMichitos/custom-load-balancer/internal/server-pool"
+import (
+	"sync"
+	serverpool "github.com/TresMichitos/custom-load-balancer/internal/server-pool"
+)
 
 // Struct to implement serverpool.LbAlgorithm interface
 type weightedRoundRobin struct {
@@ -11,6 +14,7 @@ type weightedRoundRobin struct {
 	index               int
 	weightRatioUseCount int // Number of times the weight ratio at index
 	// has been used since index incremented
+	mu sync.Mutex
 }
 
 func NewWeightedRoundRobin(weightRatio []int) *weightedRoundRobin {
@@ -19,7 +23,9 @@ func NewWeightedRoundRobin(weightRatio []int) *weightedRoundRobin {
 
 // Select server node following weight ratio
 func (weightedRoundRobin *weightedRoundRobin) NextServerNode(serverPool *serverpool.ServerPool) *serverpool.ServerNode {
-	defer func() { weightedRoundRobin.weightRatioUseCount++ }()
+	defer func() { weightedRoundRobin.weightRatioUseCount++; weightedRoundRobin.mu.Unlock() }()
+
+	weightedRoundRobin.mu.Lock()
 
 	// Increment index if server node is about to be used more times than its ratio value
 	// since index incremented
