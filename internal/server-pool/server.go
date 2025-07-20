@@ -95,12 +95,16 @@ func (server *Server) metricsHandler(w http.ResponseWriter, r *http.Request) {
 
 // Handler function to route HTTP request using balancing algorithm
 func (server *Server) requestHandler(w http.ResponseWriter, r *http.Request) {
+	server.ServerPool.mu.Lock()
 	if len(server.ServerPool.Healthy) == 0 {
 		http.Error(w, "Service unavailable: no healthy backend servers", http.StatusServiceUnavailable)
 		return
 	}
+	server.ServerPool.mu.Unlock()
 
+	server.ServerPool.mu.Lock()
 	var nextServerNode *ServerNode = server.LbAlgorithm.NextServerNode(server.ServerPool)
+	server.ServerPool.mu.Unlock()
 	nextServerNode.ForwardRequest(w, r)
 }
 

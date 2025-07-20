@@ -14,12 +14,15 @@ import (
 const TIMEOUT = 5  // Timeout in seconds
 const INTERVAL = 5 // Health check interval
 
+// Update healthy pool at regular interval
 func HealthCheckLoop(serverPool *ServerPool) {
 	for {
 		healthMap := make(map[*ServerNode]bool)
 		var mapMu sync.Mutex
 
 		var wg sync.WaitGroup
+
+		serverPool.mu.Lock()
 		for _, serverNode := range serverPool.All {
 			wg.Add(1)
 			go func(server *ServerNode) {
@@ -31,6 +34,7 @@ func HealthCheckLoop(serverPool *ServerPool) {
 				mapMu.Unlock()
 			}(serverNode)
 		}
+		serverPool.mu.Unlock()
 
 		wg.Wait()
 
@@ -49,6 +53,7 @@ func HealthCheckLoop(serverPool *ServerPool) {
 	}
 }
 
+// Attempts to send request and check status
 func isServerHealthy(server *ServerNode) bool {
 	httpClient := http.Client{Timeout: TIMEOUT * time.Second}
 
