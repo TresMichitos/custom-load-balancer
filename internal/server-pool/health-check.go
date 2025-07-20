@@ -57,23 +57,27 @@ func HealthCheckLoop(serverPool *ServerPool) {
 func isServerHealthy(server *ServerNode) bool {
 	httpClient := http.Client{Timeout: TIMEOUT * time.Second}
 
-	req, err := http.NewRequest(http.MethodGet, server.URL, nil)
+	server.mu.Lock()
+	var URL string = server.URL
+	server.mu.Unlock()
+
+	req, err := http.NewRequest(http.MethodGet, URL, nil)
 	if err != nil {
-		fmt.Printf("[%v] build-req error: %v\n", server.URL, err)
+		fmt.Printf("[%v] build-req error: %v\n", URL, err)
 		return false
 	}
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		fmt.Printf("[%v] res error: %v\n", server.URL, err)
+		fmt.Printf("[%v] res error: %v\n", URL, err)
 		return false
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
-		fmt.Printf("[%v] healthy status code: %d\n", server.URL, resp.StatusCode)
+		fmt.Printf("[%v] healthy status code: %d\n", URL, resp.StatusCode)
 		return true
 	}
-	fmt.Printf("[%v] unhealthy status code: %d\n", server.URL, resp.StatusCode)
+	fmt.Printf("[%v] unhealthy status code: %d\n", URL, resp.StatusCode)
 	return false
 }

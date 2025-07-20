@@ -97,6 +97,7 @@ func (server *Server) metricsHandler(w http.ResponseWriter, r *http.Request) {
 func (server *Server) requestHandler(w http.ResponseWriter, r *http.Request) {
 	server.ServerPool.mu.Lock()
 	if len(server.ServerPool.Healthy) == 0 {
+		server.ServerPool.mu.Unlock()
 		http.Error(w, "Service unavailable: no healthy backend servers", http.StatusServiceUnavailable)
 		return
 	}
