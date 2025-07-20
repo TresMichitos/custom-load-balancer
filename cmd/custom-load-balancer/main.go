@@ -51,6 +51,8 @@ func main() {
 		lbAlgorithm = lbAlgorithm.NewLeastUsedResources()
 	case "Random":
 		lbAlgorithm = lbalgorithms.NewRandom()
+	case "IpHashing":
+		lbAlgorithm = lbAlgorithm.NewIpHashing()
 	default:
 		lbAlgorithm = lbalgorithms.NewRoundRobin()
 	}
