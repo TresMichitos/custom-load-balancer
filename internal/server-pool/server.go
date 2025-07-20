@@ -101,9 +101,7 @@ func (server *Server) requestHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Service unavailable: no healthy backend servers", http.StatusServiceUnavailable)
 		return
 	}
-	server.ServerPool.mu.Unlock()
 
-	server.ServerPool.mu.Lock()
 	var nextServerNode *ServerNode = server.LbAlgorithm.NextServerNode(server.ServerPool)
 	server.ServerPool.mu.Unlock()
 	nextServerNode.ForwardRequest(w, r)
