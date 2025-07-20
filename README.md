@@ -31,7 +31,7 @@ Or:
   docker compose up --build
   ```
 
-Can send requests to load balancer with:
+Send requests to load balancer with:
   ```
   curl http://localhost:8080
   ```
@@ -95,7 +95,7 @@ Run Integration Tests with:
 - [Setup](https://medium.com/@aedemirsen/load-balancing-with-nginx-c1f19840e29)
 - [Docker Containers](https://medium.com/@aedemirsen/load-balancing-with-docker-compose-and-nginx-b9077696f624)
 
-### Possible Libraries To Use
+### Libraries Used
 
 - Included in Go standard library:
   - net/http
@@ -106,31 +106,44 @@ Run Integration Tests with:
 ## File Structure
 
 ```
-.                                        # Root
-├── cmd/
-│   └── custom-load-balancer/
-│       └── main.go                      # Entry point
-├── internal/                            # Package imports
-│   ├── server-pool/
-│   │   ├── pool.go                      # Core logic, add/remove servers, track connections, health status
-│   │   └── ...                          # Additional utility
-│   └── lb-algorithms/                   # Implementations of load balancing algorithms
-│       ├── round_robin.go
-│       ├── weighted_round_robin.go
-│       ├── least_connections.go
-│       ├── ip_hash.go
-│       ├── random.go
-│       ├── ...                          # Any other algorithms
-│       └── utils.go                     # Common helpers
-├── demo/                                # Simulate usage of the LB
-│   ├── client.go                        # Send client packets
-│   └── server.go                        # Simple server template
-├── docker/                              # Contains all files retaining to the docker image and containers
-│   ├── Dockerfile.loadbalancer          # Builds binary image for main.go
-│   └── Dockerfile.server                # Builds binary image for server.go                      
-├── servers.json                         # Server list (file type tbd)                           
-├── .dockerignore                        # Similar to .gitignore, outlines files for the docker container to ignore
-├── compose.yml                          # File used for building the docker containers and describing how they should interact with each other
-├── go.mod                               # Go module definition (tracks dependencies and package name) 
-└── README.MD                            # ...
+.                                         # Root
+├── .github
+│   └── workflows
+│       └── tests.yml                     # GitHub workflow to run unit and integration tests
+├── cmd
+│   └── custom-load-balancer
+│       └── main.go                       # Entrypoint of custom load balancer
+├── demo                                  # Simulate usage of the LB
+│   ├── multi-client                      # Utility for simulating a client making requests
+│   │   ├── client                        # Send client packets
+│   │   │   └── client.go
+│   │   ├── ipgen                         # Return a random IP from TEST-NET-3 IPv4 range
+│   │   │   └── main.go
+│   │   └── main.go
+│   └── server                            # Simple server template
+│       └── main.go
+├── docker                                # Contains all files retaining to the docker image and containers
+│   ├── Dockerfile.loadbalancer           # Builds binary image for main.go
+│   └── Dockerfile.server                 # Builds binary image for server.go
+├── integration                           # Integration tests for custom load balancer
+│   └── integration_test.go
+├── internal                              # Package imports
+│   ├── lb-algorithms                     # Implementations of load balancing algorithms
+│   │   ├── least_connections.go
+│   │   ├── random.go
+│   │   ├── round_robin.go
+│   │   ├── round_robin_test.go
+│   │   ├── weighted_round_robin.go
+│   │   └── weighted_round_robin_test.go
+│   └── server-pool
+│       ├── health_check.go               # Manage health checks for server pool
+│       ├── pool.go                       # Implementation of server nodes and server pool
+│       └── server.go                     # Implementation of load balancer server struct and definition of LbAlgorithm interface
+├── .dockerignore                         # Similar to .gitignore, outlines files for the docker container to ignore
+├── .gitignore
+├── README.md
+├── compose.yml                           # File used for building the docker containers and describing how they should interact with each other
+├── go.mod                                # Go module definition (tracks dependencies and package name)
+└── servers.json                          # Server list
 ```
+
