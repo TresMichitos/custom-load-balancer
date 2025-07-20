@@ -1,3 +1,5 @@
+// Integration tests for custom load balancer
+
 package integration
 
 import (
