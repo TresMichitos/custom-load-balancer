@@ -1,6 +1,4 @@
-/*
- * Manages health checks for the server pool
- */
+// Manage health checks for server pool
 
 package serverpool
 
