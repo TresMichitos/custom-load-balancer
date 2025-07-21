@@ -47,6 +47,8 @@ func main() {
 		lbAlgorithm = lbalgorithms.NewWeightedRoundRobin([]int{1, 2, 1})
 	case "LeastConnections":
 		lbAlgorithm = lbalgorithms.NewLeastConnections()
+	case "LeastUsedResources":
+		lbAlgorithm = lbAlgorithm.NewLeastUsedResources()
 	case "Random":
 		lbAlgorithm = lbalgorithms.NewRandom()
 	default:
