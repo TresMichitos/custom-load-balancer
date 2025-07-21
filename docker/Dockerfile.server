@@ -42,3 +42,6 @@ EXPOSE 9090
 
 # Setting entrypoint to run the binary
 ENTRYPOINT [ "./demo-server" ]
+
+# Defaults
+CMD [ "0" ]

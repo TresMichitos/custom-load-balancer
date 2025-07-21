@@ -7,7 +7,7 @@ services:
       - "8080:8080"
     volumes:
       - ./servers.json:/usr/local/bin/servers.json
-    command: ["--algorithm", "RoundRobin"]
+    command: ["--algorithm", "WeightedRoundRobin"]
     depends_on:
       - server1
       - server2
@@ -19,6 +19,7 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.server
+    command: ["1000"]
     environment:
       - PORT=8081
       - SERVER_ID=1
@@ -31,6 +32,7 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.server
+    command: ["500"]
     environment:
       - PORT=8082
       - SERVER_ID=2
@@ -43,6 +45,7 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.server
+    command: ["1000"]
     environment:
       - PORT=8083
       - SERVER_ID=3
