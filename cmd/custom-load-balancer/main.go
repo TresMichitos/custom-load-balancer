@@ -49,6 +49,8 @@ func main() {
 		lbAlgorithm = lbalgorithms.NewLeastConnections()
 	case "Random":
 		lbAlgorithm = lbalgorithms.NewRandom()
+	case "IpHashing":
+		lbAlgorithm = lbalgorithms.NewIpHashing()
 	default:
 		lbAlgorithm = lbalgorithms.NewRoundRobin()
 	}

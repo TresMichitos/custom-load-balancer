@@ -10,7 +10,7 @@ import (
 
 // Interface for load balancing algorithms
 type LbAlgorithm interface {
-	NextServerNode(*ServerPool) *ServerNode
+	NextServerNode(*ServerPool, *http.Request) *ServerNode
 }
 
 // Struct to represent load balancer server
@@ -102,7 +102,7 @@ func (server *Server) requestHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var nextServerNode *ServerNode = server.LbAlgorithm.NextServerNode(server.ServerPool)
+	var nextServerNode *ServerNode = server.LbAlgorithm.NextServerNode(server.ServerPool, r)
 	server.ServerPool.mu.Unlock()
 	nextServerNode.ForwardRequest(w, r)
 }
