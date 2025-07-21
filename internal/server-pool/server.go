@@ -40,7 +40,7 @@ type Metrics struct {
 func newMetrics(serverPool *ServerPool) *Metrics {
 	var metrics Metrics
 	var totalLatency int
-	var totalSamples int
+	var totalRequestCount int
 
 	serverPool.mu.Lock()
 	defer serverPool.mu.Unlock()
@@ -57,8 +57,8 @@ func newMetrics(serverPool *ServerPool) *Metrics {
 
 		if sampleCount > 0 {
 			avgLatency /= sampleCount
-			totalSamples++
-			totalLatency += avgLatency
+			totalRequestCount += serverNode.RequestCount
+			totalLatency += avgLatency * serverNode.RequestCount
 		}
 
 		// Overall metrics
@@ -77,8 +77,8 @@ func newMetrics(serverPool *ServerPool) *Metrics {
 		serverNode.mu.Unlock()
 	}
 
-	if totalSamples > 0 {
-		metrics.OverallLatency = fmt.Sprintf("%dms", totalLatency/totalSamples)
+	if totalRequestCount > 0 {
+		metrics.OverallLatency = fmt.Sprintf("%dms", totalLatency/totalRequestCount)
 	} else {
 		metrics.OverallLatency = "N/A: no samples"
 	}
