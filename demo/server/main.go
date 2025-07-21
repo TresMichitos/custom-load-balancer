@@ -1,3 +1,9 @@
+/*
+ * Simple server template
+ * Usage:
+ * 		go run main.go <latency>		# Single request
+ */
+
 package main
 
 import (
@@ -40,6 +46,7 @@ func handler(w http.ResponseWriter, _ *http.Request) {
 }
 
 func main() {
+
 	// Simulated latency
 	if len(os.Args) < 2 {
 		log.Fatal(fmt.Errorf("usage: %s <latency (ms)>", os.Args[0]))
