@@ -26,6 +26,8 @@ func main() {
 		lbAlgorithm = lbalgorithms.NewWeightedRoundRobin()
 	case "LeastConnections":
 		lbAlgorithm = lbalgorithms.NewLeastConnections()
+	case "LeastUsedResources":
+		lbAlgorithm = lbAlgorithm.NewLeastUsedResources()
 	case "Random":
 		lbAlgorithm = lbalgorithms.NewRandom()
 	case "IpHashing":
