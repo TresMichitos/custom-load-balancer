@@ -50,7 +50,7 @@ func main() {
 	case "Random":
 		lbAlgorithm = lbalgorithms.NewRandom()
 	case "IpHashing":
-		lbAlgorithm = lbAlgorithm.NewIpHashing()
+		lbAlgorithm = lbalgorithms.NewIpHashing()
 	default:
 		lbAlgorithm = lbalgorithms.NewRoundRobin()
 	}
