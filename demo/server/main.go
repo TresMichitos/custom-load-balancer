@@ -42,11 +42,11 @@ func handler(w http.ResponseWriter, _ *http.Request) {
 func main() {
 	// Simulated latency
 	if len(os.Args) < 2 {
-		fmt.Printf("usage: %s <latency (ms)>", os.Args[0])	
+		log.Fatal(fmt.Errorf("usage: %s <latency (ms)>", os.Args[0]))
 	}
 	n, err := strconv.Atoi(os.Args[1])
 	if err != nil || n <= 0 {
-		fmt.Printf("invalid latency value: %s", os.Args[1])
+		log.Fatal(fmt.Errorf("invalid latency value: %s", os.Args[1]))
 	}
 	simulatedLatency = n
 
