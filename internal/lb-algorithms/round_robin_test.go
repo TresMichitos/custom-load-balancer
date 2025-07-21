@@ -22,6 +22,7 @@ func TestRoundRobin(t *testing.T) {
 	var serverPool *serverpool.ServerPool = serverpool.NewServerPool(urls)
 	serverPool.Healthy = serverPool.All
 
+	// Dummy request to satisfy params
 	req, err := http.NewRequest("GET", "http://localhost", nil)
 	if err != nil {
 		t.Errorf("Failed to create request: %v", err)

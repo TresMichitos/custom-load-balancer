@@ -28,6 +28,7 @@ func TestWeightedRoundRobin(t *testing.T) {
 		"http://localhost:8083",
 	}
 
+	// Dummy request to satisfy params
 	req, err := http.NewRequest("GET", "http://localhost", nil)
 	if err != nil {
 		t.Errorf("Failed to create request: %v", err)
