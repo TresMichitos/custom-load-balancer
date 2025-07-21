@@ -3,6 +3,7 @@
 package lbalgorithms
 
 import (
+	"net/http"
 	"testing"
 
 	serverpool "github.com/TresMichitos/custom-load-balancer/internal/server-pool"
@@ -27,8 +28,13 @@ func TestWeightedRoundRobin(t *testing.T) {
 		"http://localhost:8083",
 	}
 
+	req, err := http.NewRequest("GET", "http://localhost", nil)
+	if err != nil {
+		t.Errorf("Failed to create request: %v", err)
+	}
+
 	for _, url := range expectedUrlsRouted {
-		var nextServerNode *serverpool.ServerNode = lbAlgorithm.NextServerNode(serverPool)
+		var nextServerNode *serverpool.ServerNode = lbAlgorithm.NextServerNode(serverPool, req)
 		if url != nextServerNode.URL {
 			t.Errorf("Routed url was %s, expected %s", nextServerNode.URL, url)
 		}
