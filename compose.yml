@@ -7,7 +7,7 @@ services:
       - "8080:8080"
     volumes:
       - ./servers.json:/usr/local/bin/servers.json
-    command: ["--algorithm", "WeightedRoundRobin"]
+    command: ["--algorithm", "RoundRobin"]
     depends_on:
       - server1
       - server2
