@@ -3,7 +3,9 @@
 package lbalgorithms
 
 import (
+	"net/http"
 	"sync"
+
 	serverpool "github.com/TresMichitos/custom-load-balancer/internal/server-pool"
 )
 
@@ -22,7 +24,7 @@ func NewWeightedRoundRobin(weightRatio []int) *weightedRoundRobin {
 }
 
 // Select server node following weight ratio
-func (weightedRoundRobin *weightedRoundRobin) NextServerNode(serverPool *serverpool.ServerPool) *serverpool.ServerNode {
+func (weightedRoundRobin *weightedRoundRobin) NextServerNode(serverPool *serverpool.ServerPool, _ *http.Request) *serverpool.ServerNode {
 	defer func() { weightedRoundRobin.weightRatioUseCount++; weightedRoundRobin.mu.Unlock() }()
 
 	weightedRoundRobin.mu.Lock()
