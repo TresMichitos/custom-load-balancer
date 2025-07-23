@@ -1,0 +1,7 @@
+load_balancer:
+  algorithm: "Random" 
+
+servers:
+  - url: "http://server1:8081"
+  - url: "http://server2:8082" 
+  - url: "http://server3:8083"

@@ -6,8 +6,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./servers.json:/usr/local/bin/servers.json
-    command: ["--algorithm", "RoundRobin"]
+      - ./config.yaml:/usr/local/bin/config.yaml
     depends_on:
       - server1
       - server2

@@ -2,9 +2,9 @@
  * Utility for simulating a client making requests.
  * Uses TEST-NET-3 IPv4 range.
  * Usage:
- * 		go run main.go <url> 										# Single request
- * 		go run main.go <url> <request count>						# Multiple requests
- * 		go run main.go <url> <request count> <client clount>		# Multiple requests & clients
+ * 		go run main.go <url> 									# Single request from a client
+ * 		go run main.go <url> <request count>					# Multiple requests from a client
+ * 		go run main.go <url> <request count> <client clount>	# Multiple requests from multiple clients
  */
 
 package main

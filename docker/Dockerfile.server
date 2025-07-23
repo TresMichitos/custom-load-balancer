@@ -33,10 +33,6 @@ WORKDIR /usr/local/bin
 # Copy the comiled binary from stage 1 using the alias
 COPY --from=builder /app/demo-server .
 
-# Copy the servers.json file which should contain urls
-# Redundant can be removed but will be needed if using server.json insider the demo-server
-COPY servers.json /usr/local/bin/servers.json
-
 # The docker container listens to the exposed port
 EXPOSE 9090
 
