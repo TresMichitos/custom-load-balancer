@@ -39,6 +39,10 @@ func main() {
 		lbAlgorithm = lbalgorithms.NewRoundRobin()
 	}
 
-	var server serverpool.Server = serverpool.Server{ServerPool: serverpool.NewServerPool(urls), LbAlgorithm: lbAlgorithm}
+	serverPool := serverpool.NewServerPool(urls)
+
+	go serverpool.HealthCheckLoop(serverPool, cfg.HealthCheck.Timeout, cfg.HealthCheck.Interval)
+
+	server := serverpool.Server{ServerPool: serverPool, LbAlgorithm: lbAlgorithm}
 	server.StartLoadBalancer()
 }

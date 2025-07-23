@@ -1,3 +1,7 @@
+health_check:
+  interval: 5s
+  timeout: 5s
+
 load_balancer:
   algorithm: "Random" 
 

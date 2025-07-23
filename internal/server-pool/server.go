@@ -108,7 +108,6 @@ func (server *Server) requestHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (server *Server) StartLoadBalancer() {
-	go HealthCheckLoop(server.ServerPool)
 	http.HandleFunc("/", server.requestHandler)
 	http.HandleFunc("/metrics", server.metricsHandler)
 	http.ListenAndServe(":8080", nil)
