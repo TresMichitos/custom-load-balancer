@@ -2,7 +2,7 @@ package client
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -15,15 +15,24 @@ type reply struct {
 	Timestamp string `json:"timestamp"`
 }
 
-func SimulateClient(TIMEOUT int, url string, requestCount int, INTERVAL int, clientID int) {
-	httpClient := http.Client{Timeout: time.Duration(TIMEOUT) * time.Second}
+func SimulateClient(url string, duration time.Duration, interval time.Duration, clientID int) {
+	httpClient := http.Client{}
 	ip := ipgen.GenTestNet3()
+	startTime := time.Now()
+	nextRequest := startTime //
+	var reqID int
 
-	for i := 1; i <= requestCount; i++ {
+	for {
+		// Break on exceeded test duration
+		if time.Since(startTime) > duration {
+			break
+		}
+		reqID++
+
 		// Build req
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		if err != nil {
-			fmt.Printf("[%02d] build-req error: %v\n", i, err)
+			log.Printf("[Client %02d - %02d] request builder error: %v\n", clientID, reqID, err)
 			continue
 		}
 		req.Header.Set("X-Forwarded-For", ip)
@@ -31,22 +40,31 @@ func SimulateClient(TIMEOUT int, url string, requestCount int, INTERVAL int, cli
 		// Send req
 		resp, err := httpClient.Do(req)
 		if err != nil {
-			fmt.Printf("[%02d] request error: %v\n", i, err)
+			log.Printf("[Client %02d - %02d] request error: %v\n", clientID, reqID, err)
 			continue
 		}
 
 		// Parse response
 		var r reply
 		if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
-			fmt.Printf("[%02d]: Decode error: %v\n", i, err)
+			log.Printf("[Client %02d - %02d]: decode error: %v\n", clientID, reqID, err)
 			resp.Body.Close()
 			continue
 		}
 		resp.Body.Close()
 
-		// Log and interval
-		fmt.Printf("[%s] [Client %02d - %02d]: host=%s port=%s ts=%s\n",
-			time.Now().Format("15:04:05"), clientID, i, r.Hostname, r.Port, r.Timestamp)
-		time.Sleep(time.Duration(INTERVAL) * time.Millisecond)
+		// Log
+		log.Printf(
+			"[Client %02d - %02d]: host=%s port=%s\n",
+			clientID, reqID, r.Hostname, r.Port,
+		)
+		delay := time.Since(nextRequest)
+		if delay > interval {
+			log.Printf("[Client %02d - %02d] WARN: late by %v", clientID, reqID, delay)
+		}
+
+		// Wait for next request
+		nextRequest = nextRequest.Add(interval)
+		time.Sleep(time.Until(nextRequest))
 	}
 }

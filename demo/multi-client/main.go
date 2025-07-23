@@ -1,72 +1,39 @@
 /*
  * Utility for simulating a client making requests.
  * Uses TEST-NET-3 IPv4 range.
- * Usage:
- * 		go run main.go <url> 									# Single request from a client
- * 		go run main.go <url> <request count>					# Multiple requests from a client
- * 		go run main.go <url> <request count> <client clount>	# Multiple requests from multiple clients
  */
 
 package main
 
 import (
-	"fmt"
-	"log"
-	"os"
-	"strconv"
+	"flag"
 	"sync"
+	"time"
 
 	client "github.com/TresMichitos/custom-load-balancer/demo/multi-client/client"
 )
 
-const TIMEOUT = 5     // Timeout in seconds
-const INTERVAL = 1000 // Interval between requests in ms
+var (
+	loadBalancerURL = flag.String("url", "http://localhost:8080", "URL of load balancer")
+	numClients      = flag.Int("clients", 1, "Number of concurrent clients")
+	duration        = flag.Duration("duration", 30*time.Second, "Duration of test")
+	requestRate     = flag.Float64("rate", 1, "Requests per second per client")
+	// outputFile      = flag.String("file", "", "CSV output file for results")
+)
 
 func main() {
-	var url, requestCount, clientCount, err = readArgs()
-	if err != nil {
-		log.Fatal(err)
-	}
+	flag.Parse()
+	clientInterval := time.Duration(1.0 / *requestRate * float64(time.Second)) // inverse request rate
 
 	var wg sync.WaitGroup
 
-	for i := 1; i <= clientCount; i++ {
+	for i := 1; i <= *numClients; i++ {
 		wg.Add(1)
 		go func(clientID int) {
 			defer wg.Done()
-			client.SimulateClient(TIMEOUT, url, requestCount, INTERVAL, i)
+			client.SimulateClient(*loadBalancerURL, *duration, clientInterval, i)
 		}(i)
 	}
 
 	wg.Wait()
-}
-
-func readArgs() (string, int, int, error) {
-	// URL
-	if len(os.Args) < 2 {
-		return "", 0, 0, fmt.Errorf("usage: %s <url> <count>", os.Args[0])
-	}
-	url := os.Args[1]
-
-	// Request count
-	requestCount := 1
-	if len(os.Args) > 2 {
-		n, err := strconv.Atoi(os.Args[2])
-		if err != nil || n <= 0 {
-			return "", 0, 0, fmt.Errorf("invalid request count: %s", os.Args[2])
-		}
-		requestCount = n
-	}
-
-	// Client count
-	clientCount := 1
-	if len(os.Args) > 3 {
-		n, err := strconv.Atoi(os.Args[3])
-		if err != nil || n <= 0 {
-			return "", 0, 0, fmt.Errorf("invalid client count: %s", os.Args[3])
-		}
-		clientCount = n
-	}
-
-	return url, requestCount, clientCount, nil
 }
