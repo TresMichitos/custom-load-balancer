@@ -107,8 +107,10 @@ func (server *Server) requestHandler(w http.ResponseWriter, r *http.Request) {
 	nextServerNode.ForwardRequest(w, r)
 }
 
-func (server *Server) StartLoadBalancer() {
+func (server *Server) StartLoadBalancer(enableMetrics bool) {
 	http.HandleFunc("/", server.requestHandler)
-	http.HandleFunc("/metrics", server.metricsHandler)
+	if enableMetrics {
+		http.HandleFunc("/metrics", server.metricsHandler)
+	}
 	http.ListenAndServe(":8080", nil)
 }

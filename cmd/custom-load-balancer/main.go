@@ -51,5 +51,5 @@ func main() {
 		ServerPool:  serverPool,
 		LbAlgorithm: lbAlgorithm,
 	}
-	server.StartLoadBalancer()
+	server.StartLoadBalancer(cfg.Metrics.Enabled)
 }
