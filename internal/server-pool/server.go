@@ -104,7 +104,7 @@ func (server *Server) requestHandler(w http.ResponseWriter, r *http.Request) {
 
 	var nextServerNode *ServerNode = server.LbAlgorithm.NextServerNode(server.ServerPool, r)
 	server.ServerPool.mu.Unlock()
-	nextServerNode.ForwardRequest(w, r)
+	nextServerNode.ForwardRequest(w, r, server.ServerPool)
 }
 
 func (server *Server) StartLoadBalancer(enableMetrics bool) {

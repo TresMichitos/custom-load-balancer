@@ -18,7 +18,7 @@ func TestWeightedRoundRobin(t *testing.T) {
 		"http://localhost:8082",
 		"http://localhost:8083",
 	}
-	var serverPool *serverpool.ServerPool = serverpool.NewServerPool(urls)
+	var serverPool *serverpool.ServerPool = serverpool.NewServerPool(urls, 1)
 	serverPool.Healthy = serverPool.All
 
 	var expectedUrlsRouted []string = []string{

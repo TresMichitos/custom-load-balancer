@@ -46,7 +46,7 @@ func NewServerNode(urlInput string) (*ServerNode, error) {
 }
 
 // Proxy function to forward HTTP request to server node
-func (serverNode *ServerNode) ForwardRequest(w http.ResponseWriter, r *http.Request) {
+func (serverNode *ServerNode) ForwardRequest(w http.ResponseWriter, r *http.Request, serverPool *ServerPool) {
 	startTime := time.Now()
 
 	// Pre-metrics
@@ -68,7 +68,7 @@ func (serverNode *ServerNode) ForwardRequest(w http.ResponseWriter, r *http.Requ
 	serverNode.ActiveConnections--
 	serverNode.Latency = elapsedTime
 	serverNode.LatencySamples = append(serverNode.LatencySamples, elapsedTime)
-	if len(serverNode.LatencySamples) > 100 {
+	if len(serverNode.LatencySamples) > serverPool.MaxLatencySamples {
 		serverNode.LatencySamples = serverNode.LatencySamples[1:]
 	}
 
@@ -81,21 +81,27 @@ func (serverNode *ServerNode) ForwardRequest(w http.ResponseWriter, r *http.Requ
 
 // Struct to contain collection of server nodes
 type ServerPool struct {
-	All     []*ServerNode
-	Healthy []*ServerNode
-	mu      sync.Mutex
+	All               []*ServerNode
+	Healthy           []*ServerNode
+	mu                sync.Mutex
+	MaxLatencySamples int
 }
 
 // Factory function to initialise a new ServerPool object
-func NewServerPool(urls []string) *ServerPool {
-	var serverPool ServerPool
+func NewServerPool(urls []string, maxLatencySamples int) *ServerPool {
+	var nodes []*ServerNode
 	for _, url := range urls {
 		newServerNode, err := NewServerNode(url)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
-		serverPool.All = append(serverPool.All, newServerNode)
+		nodes = append(nodes, newServerNode)
 	}
-	return &serverPool
+
+	return &ServerPool{
+		All:               nodes,
+		Healthy:           []*ServerNode{},
+		MaxLatencySamples: maxLatencySamples,
+	}
 }

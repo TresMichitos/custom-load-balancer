@@ -11,4 +11,5 @@ servers:
   - url: "http://server3:8083"
 
 metrics:
-  enabled: false
+  enabled: true
+  latency_samples: 100
