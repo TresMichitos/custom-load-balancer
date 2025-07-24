@@ -1,7 +1,12 @@
+/*
+ * Simple server template
+ */
+
 package main
 
 import (
 	"encoding/json"
+	"flag"
 	"log"
 	"net/http"
 	"os"
@@ -14,7 +19,7 @@ type reply struct {
 	Timestamp string `json:"timestamp"`
 }
 
-const SIMULATED_LATENCY = -1 // In milliseconds
+var simulatedLatency = flag.Int("latency", 1, "The server's simulated latency in ms")
 
 var listenPort string
 
@@ -28,7 +33,7 @@ func handler(w http.ResponseWriter, _ *http.Request) {
 		}
 	}
 
-	time.Sleep(SIMULATED_LATENCY * time.Millisecond)
+	time.Sleep(time.Duration(*simulatedLatency) * time.Millisecond)
 
 	_ = json.NewEncoder(w).Encode(reply{
 		Hostname:  hostname,
@@ -38,6 +43,8 @@ func handler(w http.ResponseWriter, _ *http.Request) {
 }
 
 func main() {
+	flag.Parse()
+
 	// Honour $PORT if set; default to 8080.
 	port := os.Getenv("PORT")
 	if port == "" {
