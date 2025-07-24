@@ -32,9 +32,6 @@ WORKDIR /usr/local/bin
 # Copy the comiled binary from stage 1 using the alias
 COPY --from=builder /app/custom-load-balancer .
 
-# Copy the servers.json file which should contain urls
-COPY servers.json /usr/local/bin/servers.json
-
 # The docker container listens to the exposed port
 EXPOSE 8080
 
@@ -42,4 +39,4 @@ EXPOSE 8080
 ENTRYPOINT [ "./custom-load-balancer" ]
 
 # Defaults
-CMD [ "--algorithm", "RoundRobin" ]
+CMD []
