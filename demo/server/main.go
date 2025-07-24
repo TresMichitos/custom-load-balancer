@@ -1,18 +1,15 @@
 /*
  * Simple server template
- * Usage:
- * 		go run main.go <latency>		# Single request
  */
 
 package main
 
 import (
 	"encoding/json"
-	"fmt"
+	"flag"
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 )
 
@@ -22,7 +19,7 @@ type reply struct {
 	Timestamp string `json:"timestamp"`
 }
 
-var simulatedLatency int // In milliseconds
+var simulatedLatency = flag.Int("latency", 1, "The server's simulated latency in ms")
 
 var listenPort string
 
@@ -36,7 +33,7 @@ func handler(w http.ResponseWriter, _ *http.Request) {
 		}
 	}
 
-	time.Sleep(time.Duration(simulatedLatency) * time.Millisecond)
+	time.Sleep(time.Duration(*simulatedLatency) * time.Millisecond)
 
 	_ = json.NewEncoder(w).Encode(reply{
 		Hostname:  hostname,
@@ -46,16 +43,7 @@ func handler(w http.ResponseWriter, _ *http.Request) {
 }
 
 func main() {
-
-	// Simulated latency
-	if len(os.Args) < 2 {
-		log.Fatal(fmt.Errorf("usage: %s <latency (ms)>", os.Args[0]))
-	}
-	n, err := strconv.Atoi(os.Args[1])
-	if err != nil || n <= 0 {
-		log.Fatal(fmt.Errorf("invalid latency value: %s", os.Args[1]))
-	}
-	simulatedLatency = n
+	flag.Parse()
 
 	// Honour $PORT if set; default to 8080.
 	port := os.Getenv("PORT")

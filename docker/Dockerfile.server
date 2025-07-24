@@ -44,4 +44,4 @@ EXPOSE 9090
 ENTRYPOINT [ "./demo-server" ]
 
 # Defaults
-CMD [ "0" ]
+CMD [ "--latency", "0" ]

@@ -19,7 +19,7 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.server
-    command: ["1000"]
+    command: ["--latency", "1000"]
     environment:
       - PORT=8081
       - SERVER_ID=1
@@ -32,7 +32,7 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.server
-    command: ["500"]
+    command: ["--latency", "500"]
     environment:
       - PORT=8082
       - SERVER_ID=2
@@ -45,7 +45,7 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.server
-    command: ["1000"]
+    command: ["--latency", "1000"]
     environment:
       - PORT=8083
       - SERVER_ID=3
