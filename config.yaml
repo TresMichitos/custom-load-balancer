@@ -1,0 +1,15 @@
+health_check:
+  interval: 5s
+  timeout: 5s
+
+load_balancer:
+  algorithm: "RoundRobin" 
+
+servers:
+  - url: "http://server1:8081"
+  - url: "http://server2:8082" 
+  - url: "http://server3:8083"
+
+metrics:
+  enabled: true
+  latency_samples: 100
