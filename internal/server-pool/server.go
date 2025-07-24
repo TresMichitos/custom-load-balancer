@@ -4,7 +4,6 @@ package serverpool
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 )
 
@@ -22,25 +21,25 @@ type Server struct {
 // Struct to represent JSON serverNodeMetrics object
 type ServerNodeMetrics struct {
 	URL            string `json:"url"`
-	RequestCount   int    `json:"requestCount"`
-	SuccessCount   int    `json:"successCount"`
-	FailureCount   int    `json:"failureCount"`
-	AverageLatency string `json:"averageLatency"`
+	RequestCount   int64  `json:"requestCount"`
+	SuccessCount   int64  `json:"successCount"`
+	FailureCount   int64  `json:"failureCount"`
+	AverageLatency int64  `json:"averageLatency"`
 }
 
 // Struct to represent JSON Metrics object
 type Metrics struct {
-	TotalRequests     int                 `json:"totalRequests"`
-	TotalSuccesses    int                 `json:"totalSuccesses"`
-	TotalFailures     int                 `json:"totalFailures"`
-	OverallLatency    string              `json:"overallLatency"`
+	TotalRequests     int64               `json:"totalRequests"`
+	TotalSuccesses    int64               `json:"totalSuccesses"`
+	TotalFailures     int64               `json:"totalFailures"`
+	OverallLatency    int64               `json:"overallLatency"`
 	ServerNodeMetrics []ServerNodeMetrics `json:"serverNodeMetrics"`
 }
 
 func newMetrics(serverPool *ServerPool) *Metrics {
 	var metrics Metrics
-	var totalLatency int
-	var totalRequestCount int
+	var totalLatency int64
+	var totalRequests int64
 
 	serverPool.mu.Lock()
 	defer serverPool.mu.Unlock()
@@ -49,15 +48,15 @@ func newMetrics(serverPool *ServerPool) *Metrics {
 		serverNode.mu.Lock()
 
 		// Node avg latency
-		var avgLatency int
+		var avgLatency int64
 		sampleCount := len(serverNode.LatencySamples)
 		for _, sample := range serverNode.LatencySamples {
 			avgLatency += sample
 		}
 
 		if sampleCount > 0 {
-			avgLatency /= sampleCount
-			totalRequestCount += serverNode.RequestCount
+			avgLatency /= int64(sampleCount)
+			totalRequests += serverNode.RequestCount
 			totalLatency += avgLatency * serverNode.RequestCount
 		}
 
@@ -71,16 +70,16 @@ func newMetrics(serverPool *ServerPool) *Metrics {
 			RequestCount:   serverNode.RequestCount,
 			SuccessCount:   serverNode.SuccessCount,
 			FailureCount:   serverNode.FailureCount,
-			AverageLatency: fmt.Sprintf("%dms", avgLatency),
+			AverageLatency: avgLatency,
 		})
 
 		serverNode.mu.Unlock()
 	}
 
-	if totalRequestCount > 0 {
-		metrics.OverallLatency = fmt.Sprintf("%dms", totalLatency/totalRequestCount)
+	if totalRequests > 0 {
+		metrics.OverallLatency = totalLatency / int64(totalRequests)
 	} else {
-		metrics.OverallLatency = "N/A: no samples"
+		metrics.OverallLatency = -1
 	}
 
 	return &metrics

@@ -17,11 +17,11 @@ type ServerNode struct {
 	URL               string
 	ReverseProxy      *httputil.ReverseProxy
 	ActiveConnections int
-	RequestCount      int
-	SuccessCount      int
-	FailureCount      int
-	Latency           int   // Most recent request
-	LatencySamples    []int // Rolling buffer
+	RequestCount      int64
+	SuccessCount      int64
+	FailureCount      int64
+	Latency           int64   // Most recent request
+	LatencySamples    []int64 // Rolling buffer
 	mu                sync.Mutex
 }
 
@@ -60,7 +60,7 @@ func (serverNode *ServerNode) ForwardRequest(w http.ResponseWriter, r *http.Requ
 	serverNode.ReverseProxy.ServeHTTP(rww, r)
 
 	// Post-metrics
-	elapsedTime := int(time.Since(startTime).Milliseconds())
+	elapsedTime := int64(time.Since(startTime).Microseconds())
 
 	serverNode.mu.Lock()
 	defer serverNode.mu.Unlock()
