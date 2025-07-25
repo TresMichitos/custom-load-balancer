@@ -37,12 +37,16 @@ func (rw *responseWriterWrapper) WriteHeader(code int) {
 }
 
 // Factory function to initialise a new ServerNode object
-func NewServerNode(urlInput string) (*ServerNode, error) {
+func NewServerNode(urlInput string, maxLatencySamples int) (*ServerNode, error) {
 	url, err := url.Parse(urlInput)
 	if err != nil {
 		return nil, errors.New("invalid URL")
 	}
-	return &ServerNode{URL: urlInput, ReverseProxy: httputil.NewSingleHostReverseProxy(url)}, nil
+	return &ServerNode{
+		URL:            urlInput,
+		ReverseProxy:   httputil.NewSingleHostReverseProxy(url),
+		LatencySamples: make([]int64, 0, maxLatencySamples),
+	}, nil
 }
 
 // Proxy function to forward HTTP request to server node
@@ -91,7 +95,7 @@ type ServerPool struct {
 func NewServerPool(urls []string, maxLatencySamples int) *ServerPool {
 	var nodes []*ServerNode
 	for _, url := range urls {
-		newServerNode, err := NewServerNode(url)
+		newServerNode, err := NewServerNode(url, maxLatencySamples)
 		if err != nil {
 			fmt.Println(err)
 			continue
