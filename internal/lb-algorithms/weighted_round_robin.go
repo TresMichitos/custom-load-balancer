@@ -25,9 +25,11 @@ func NewWeightedRoundRobin(weightRatio []int) *weightedRoundRobin {
 
 // Select server node following weight ratio
 func (weightedRoundRobin *weightedRoundRobin) NextServerNode(serverPool *serverpool.ServerPool, _ *http.Request) *serverpool.ServerNode {
-	defer func() { weightedRoundRobin.weightRatioUseCount++; weightedRoundRobin.mu.Unlock() }()
-
 	weightedRoundRobin.mu.Lock()
+	defer weightedRoundRobin.mu.Unlock()
+
+	serverPool.Mu.Lock()
+	defer serverPool.Mu.Unlock()
 
 	// Increment index if server node is about to be used more times than its ratio value
 	// since index incremented
@@ -41,5 +43,8 @@ func (weightedRoundRobin *weightedRoundRobin) NextServerNode(serverPool *serverp
 		weightedRoundRobin.weightRatioUseCount = 1
 	}
 
-	return serverPool.Healthy[weightedRoundRobin.index]
+	server := serverPool.Healthy[weightedRoundRobin.index]
+	weightedRoundRobin.weightRatioUseCount++
+
+	return server
 }

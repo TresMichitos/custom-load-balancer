@@ -21,12 +21,18 @@ func NewRoundRobin() *roundRobin {
 
 // Select server node by iterating over server pool
 func (roundRobin *roundRobin) NextServerNode(serverPool *serverpool.ServerPool, _ *http.Request) *serverpool.ServerNode {
-	defer func() { roundRobin.index++; roundRobin.mu.Unlock() }()
-
 	roundRobin.mu.Lock()
+	defer roundRobin.mu.Unlock()
+
+	serverPool.Mu.Lock()
+	defer serverPool.Mu.Unlock()
 
 	if roundRobin.index >= len(serverPool.Healthy) {
 		roundRobin.index = 0
 	}
-	return serverPool.Healthy[roundRobin.index]
+
+	server := serverPool.Healthy[roundRobin.index]
+	roundRobin.index++
+
+	return server
 }

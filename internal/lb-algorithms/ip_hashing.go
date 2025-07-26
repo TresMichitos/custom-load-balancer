@@ -16,8 +16,10 @@ func NewIpHashing() *ipHashing {
 }
 
 func (ipHashing *ipHashing) NextServerNode(serverPool *serverpool.ServerPool, req *http.Request) *serverpool.ServerNode {
-
 	ipClient := req.Header.Get("X-Forwarded-For")
+
+	serverPool.Mu.Lock()
+	defer serverPool.Mu.Unlock()
 
 	if (len(serverPool.Healthy) == 1) || (ipClient == "") {
 		return serverPool.Healthy[0]

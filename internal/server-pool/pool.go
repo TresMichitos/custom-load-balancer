@@ -87,7 +87,7 @@ func (serverNode *ServerNode) ForwardRequest(w http.ResponseWriter, r *http.Requ
 type ServerPool struct {
 	All               []*ServerNode
 	Healthy           []*ServerNode
-	mu                sync.Mutex
+	Mu                sync.Mutex
 	MaxLatencySamples int
 }
 

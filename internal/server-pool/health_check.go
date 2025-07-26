@@ -17,7 +17,7 @@ func HealthCheckLoop(serverPool *ServerPool, timeout time.Duration, interval tim
 
 		var wg sync.WaitGroup
 
-		serverPool.mu.Lock()
+		serverPool.Mu.Lock()
 		for _, serverNode := range serverPool.All {
 			wg.Add(1)
 			go func(server *ServerNode) {
@@ -29,7 +29,7 @@ func HealthCheckLoop(serverPool *ServerPool, timeout time.Duration, interval tim
 				mapMu.Unlock()
 			}(serverNode)
 		}
-		serverPool.mu.Unlock()
+		serverPool.Mu.Unlock()
 
 		wg.Wait()
 
@@ -40,9 +40,9 @@ func HealthCheckLoop(serverPool *ServerPool, timeout time.Duration, interval tim
 			}
 		}
 
-		serverPool.mu.Lock()
+		serverPool.Mu.Lock()
 		serverPool.Healthy = healthyPool
-		serverPool.mu.Unlock()
+		serverPool.Mu.Unlock()
 
 		time.Sleep(interval)
 	}
