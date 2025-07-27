@@ -15,11 +15,11 @@ func NewIpHashing() *ipHashing {
 	return &ipHashing{}
 }
 
-func (ipHashing *ipHashing) GetName() string {
+func (ih *ipHashing) GetName() string {
 	return "ipHashing"
 }
 
-func (ipHashing *ipHashing) NextServerNode(serverPool *serverpool.ServerPool, req *http.Request) *serverpool.ServerNode {
+func (ih *ipHashing) NextServerNode(serverPool *serverpool.ServerPool, req *http.Request) *serverpool.ServerNode {
 	ipClient := req.Header.Get("X-Forwarded-For")
 
 	if (len(serverPool.Healthy) == 1) || (ipClient == "") {

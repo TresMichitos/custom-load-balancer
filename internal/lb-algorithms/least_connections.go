@@ -14,11 +14,11 @@ func NewLeastConnections() *leastConnections {
 	return &leastConnections{}
 }
 
-func (leastConnections *leastConnections) GetName() string {
+func (lc *leastConnections) GetName() string {
 	return "leastConnections"
 }
 
-func (leastConnections *leastConnections) NextServerNode(serverPool *serverpool.ServerPool, _ *http.Request) *serverpool.ServerNode {
+func (lc *leastConnections) NextServerNode(serverPool *serverpool.ServerPool, _ *http.Request) *serverpool.ServerNode {
 	if len(serverPool.Healthy) == 1 {
 		return serverPool.Healthy[0]
 	}

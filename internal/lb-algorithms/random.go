@@ -15,11 +15,11 @@ func NewRandom() *random {
 	return &random{}
 }
 
-func (random *random) GetName() string {
+func (r *random) GetName() string {
 	return "leastConnections"
 }
 
-func (random *random) NextServerNode(serverPool *serverpool.ServerPool, _ *http.Request) *serverpool.ServerNode {
+func (r *random) NextServerNode(serverPool *serverpool.ServerPool, _ *http.Request) *serverpool.ServerNode {
 	if len(serverPool.Healthy) == 1 {
 		return serverPool.Healthy[0]
 	}

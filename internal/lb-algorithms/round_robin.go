@@ -19,21 +19,21 @@ func NewRoundRobin() *roundRobin {
 	return &roundRobin{}
 }
 
-func (roundRobin *roundRobin) GetName() string {
+func (rr *roundRobin) GetName() string {
 	return "leastConnections"
 }
 
 // Select server node by iterating over server pool
-func (roundRobin *roundRobin) NextServerNode(serverPool *serverpool.ServerPool, _ *http.Request) *serverpool.ServerNode {
-	roundRobin.mu.Lock()
-	defer roundRobin.mu.Unlock()
+func (rr *roundRobin) NextServerNode(serverPool *serverpool.ServerPool, _ *http.Request) *serverpool.ServerNode {
+	rr.mu.Lock()
+	defer rr.mu.Unlock()
 
-	if roundRobin.index >= len(serverPool.Healthy) {
-		roundRobin.index = 0
+	if rr.index >= len(serverPool.Healthy) {
+		rr.index = 0
 	}
 
-	server := serverPool.Healthy[roundRobin.index]
-	roundRobin.index++
+	server := serverPool.Healthy[rr.index]
+	rr.index++
 
 	return server
 }
