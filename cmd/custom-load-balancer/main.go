@@ -12,7 +12,7 @@ import (
 
 // Initialise load balancer server with configured urls and algorithm parameter
 func main() {
-	cfg, err := config.LoadConfig("config.yaml")
+	cfg, err := config.LoadConfig("config.yml")
 	if err != nil {
 		log.Fatal("Failed to load config:", err)
 	}
