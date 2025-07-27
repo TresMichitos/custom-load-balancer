@@ -20,7 +20,7 @@ func NewRoundRobin() *roundRobin {
 }
 
 func (rr *roundRobin) GetName() string {
-	return "leastConnections"
+	return "roundRobin"
 }
 
 // Select server node by iterating over server pool

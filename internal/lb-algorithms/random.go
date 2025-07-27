@@ -16,7 +16,7 @@ func NewRandom() *random {
 }
 
 func (r *random) GetName() string {
-	return "leastConnections"
+	return "random"
 }
 
 func (r *random) NextServerNode(serverPool *serverpool.ServerPool, _ *http.Request) *serverpool.ServerNode {

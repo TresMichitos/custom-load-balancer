@@ -25,7 +25,7 @@ func NewWeightedRoundRobin() *weightedRoundRobin {
 }
 
 func (wrr *weightedRoundRobin) GetName() string {
-	return "leastConnections"
+	return "weightedRoundRobin"
 }
 
 // Select next server node according to weight/usage and health state
