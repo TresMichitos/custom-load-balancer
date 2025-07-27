@@ -17,10 +17,8 @@ func main() {
 		log.Fatal("Failed to load config:", err)
 	}
 
-	urls := make([]string, len(cfg.Servers))
 	weights := make([]int, len(cfg.Servers))
 	for i, server := range cfg.Servers {
-		urls[i] = server.URL
 		weights[i] = server.Weight
 	}
 
