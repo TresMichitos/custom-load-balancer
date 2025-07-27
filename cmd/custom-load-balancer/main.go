@@ -27,7 +27,7 @@ func main() {
 	case "LeastConnections":
 		lbAlgorithm = lbalgorithms.NewLeastConnections()
 	case "LeastUsedResources":
-		lbAlgorithm = lbAlgorithm.NewLeastUsedResources()
+		lbAlgorithm = lbalgorithms.NewLeastUsedResources()
 	case "Random":
 		lbAlgorithm = lbalgorithms.NewRandom()
 	case "IpHashing":
