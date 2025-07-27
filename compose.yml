@@ -18,7 +18,7 @@ services:
       dockerfile: docker/Dockerfile.server
     command: ["--latency", "-1s"] # config.yaml preferred
     environment:
-      - PORT=8080
+      - PORT=9090
     labels:
       - "server=true"
     networks:

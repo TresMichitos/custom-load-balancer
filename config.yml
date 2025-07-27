@@ -6,7 +6,7 @@ load_balancer:
   algorithm: "RoundRobin" 
 
 servers:
-  - url: "http://server:8080"
+  - url: "http://server:9090"
     count: 5
     weight: 1
     artificial_latency: -1ms
