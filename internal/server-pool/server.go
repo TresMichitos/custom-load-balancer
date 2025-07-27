@@ -4,7 +4,10 @@ package serverpool
 
 import (
 	"encoding/json"
+	"math"
 	"net/http"
+	"slices"
+	"time"
 )
 
 // Interface for load balancing algorithms
@@ -25,15 +28,22 @@ type ServerNodeMetrics struct {
 	SuccessCount   int64  `json:"successCount"`
 	FailureCount   int64  `json:"failureCount"`
 	AverageLatency int64  `json:"averageLatency"`
+	P1Latency      int64  `json:"p1Latency"`
+	P5Latency      int64  `json:"p5Latency"`
+	P95Latency     int64  `json:"p95Latency"`
+	P99Latency     int64  `json:"p99Latency"`
 }
 
 // Struct to represent JSON Metrics object
 type Metrics struct {
-	TotalRequests     int64               `json:"totalRequests"`
-	TotalSuccesses    int64               `json:"totalSuccesses"`
-	TotalFailures     int64               `json:"totalFailures"`
-	OverallLatency    int64               `json:"overallLatency"`
-	ServerNodeMetrics []ServerNodeMetrics `json:"serverNodeMetrics"`
+	Algorithm            string              `json:"algorithm"`
+	Timestamp            time.Time           `json:"timestamp"`
+	TotalRequests        int64               `json:"totalRequests"`
+	TotalSuccesses       int64               `json:"totalSuccesses"`
+	TotalFailures        int64               `json:"totalFailures"`
+	OverallLatency       int64               `json:"overallLatency"`
+	DistributionFairness float64             `json:"distributionFairness"`
+	ServerNodeMetrics    []ServerNodeMetrics `json:"serverNodeMetrics"`
 }
 
 func newMetrics(serverPool *ServerPool) *Metrics {
@@ -60,6 +70,9 @@ func newMetrics(serverPool *ServerPool) *Metrics {
 			totalLatency += avgLatency * serverNode.RequestCount
 		}
 
+		// Latency percentiles
+		p1, p5, p95, p99 := serverNode.calculateLatencyPercentiles()
+
 		// Overall metrics
 		metrics.TotalRequests += serverNode.RequestCount
 		metrics.TotalSuccesses += serverNode.SuccessCount
@@ -71,6 +84,10 @@ func newMetrics(serverPool *ServerPool) *Metrics {
 			SuccessCount:   serverNode.SuccessCount,
 			FailureCount:   serverNode.FailureCount,
 			AverageLatency: avgLatency,
+			P1Latency:      p1,
+			P5Latency:      p5,
+			P95Latency:     p95,
+			P99Latency:     p99,
 		})
 
 		serverNode.mu.Unlock()
@@ -78,11 +95,52 @@ func newMetrics(serverPool *ServerPool) *Metrics {
 
 	if totalRequests > 0 {
 		metrics.OverallLatency = totalLatency / int64(totalRequests)
+		metrics.DistributionFairness = serverPool.calculateDistributionFairness()
 	} else {
 		metrics.OverallLatency = -1
 	}
 
 	return &metrics
+}
+
+func (server *ServerNode) calculateLatencyPercentiles() (p1, p5, p95, p99 int64) {
+	if len(server.LatencySamples) == 0 {
+		return 0, 0, 0, 0
+	}
+
+	// Sort for perecentile calcs
+	sorted := make([]int64, len(server.LatencySamples))
+	copy(sorted, server.LatencySamples)
+	slices.Sort(sorted)
+
+	p1 = sorted[len(sorted)*1/100]
+	p5 = sorted[len(sorted)*5/100]
+	p95 = sorted[len(sorted)*95/100]
+	p99 = sorted[len(sorted)*99/100]
+
+	return p1, p5, p95, p99
+}
+
+func (pool *ServerPool) calculateDistributionFairness() float64 {
+	if len(pool.All) == 1 {
+		return 0.0
+	}
+
+	// Mean and total requests
+	var totalRequests, sumDifferential float64
+	for _, server := range pool.All {
+		totalRequests += float64(server.RequestCount)
+	}
+	meanRequests := totalRequests / float64(len(pool.All))
+
+	// Sum of differentials squared
+	for _, server := range pool.All {
+		diff := float64(server.RequestCount) - meanRequests
+		sumDifferential += diff * diff
+	}
+
+	// Standard deviation
+	return math.Sqrt(float64(sumDifferential) / float64(len(pool.All)))
 }
 
 // Handler function to provide load balancer metrics
