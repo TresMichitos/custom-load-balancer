@@ -41,8 +41,8 @@ func newMetrics(serverPool *ServerPool) *Metrics {
 	var totalLatency int64
 	var totalRequests int64
 
-	serverPool.Mu.Lock()
-	defer serverPool.Mu.Unlock()
+	serverPool.mu.Lock()
+	defer serverPool.mu.Unlock()
 
 	for _, serverNode := range serverPool.Healthy {
 		serverNode.mu.Lock()
@@ -94,15 +94,15 @@ func (server *Server) metricsHandler(w http.ResponseWriter, r *http.Request) {
 
 // Handler function to route HTTP request using balancing algorithm
 func (server *Server) requestHandler(w http.ResponseWriter, r *http.Request) {
-	server.ServerPool.Mu.Lock()
+	server.ServerPool.mu.Lock()
 	if len(server.ServerPool.Healthy) == 0 {
-		server.ServerPool.Mu.Unlock()
+		server.ServerPool.mu.Unlock()
 		http.Error(w, "Service unavailable: no healthy backend servers", http.StatusServiceUnavailable)
 		return
 	}
 
 	var nextServerNode *ServerNode = server.LbAlgorithm.NextServerNode(server.ServerPool, r)
-	server.ServerPool.Mu.Unlock()
+	server.ServerPool.mu.Unlock()
 	nextServerNode.ForwardRequest(w, r, server.ServerPool)
 }
 

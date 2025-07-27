@@ -15,9 +15,6 @@ func NewLeastConnections() *leastConnections {
 }
 
 func (leastConnections *leastConnections) NextServerNode(serverPool *serverpool.ServerPool, _ *http.Request) *serverpool.ServerNode {
-	serverPool.Mu.Lock()
-	defer serverPool.Mu.Unlock()
-
 	if len(serverPool.Healthy) == 1 {
 		return serverPool.Healthy[0]
 	}

@@ -28,9 +28,6 @@ func (weightedRoundRobin *weightedRoundRobin) NextServerNode(serverPool *serverp
 	weightedRoundRobin.mu.Lock()
 	defer weightedRoundRobin.mu.Unlock()
 
-	serverPool.Mu.Lock()
-	defer serverPool.Mu.Unlock()
-
 	// Increment index if server node is about to be used more times than its ratio value
 	// since index incremented
 	if weightedRoundRobin.weightRatioUseCount > weightedRoundRobin.weightRatio[weightedRoundRobin.index] {

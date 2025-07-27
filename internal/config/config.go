@@ -23,7 +23,8 @@ type Config struct {
 	} `yaml:"load_balancer"`
 
 	Servers []struct {
-		URL string `yaml:"url"`
+		URL    string `yaml:"url"`
+		Weight int    `yaml:"weight"`
 	} `yaml:"servers"`
 
 	Metrics struct {

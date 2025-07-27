@@ -24,9 +24,6 @@ func (roundRobin *roundRobin) NextServerNode(serverPool *serverpool.ServerPool, 
 	roundRobin.mu.Lock()
 	defer roundRobin.mu.Unlock()
 
-	serverPool.Mu.Lock()
-	defer serverPool.Mu.Unlock()
-
 	if roundRobin.index >= len(serverPool.Healthy) {
 		roundRobin.index = 0
 	}

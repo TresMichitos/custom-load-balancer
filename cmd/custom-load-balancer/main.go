@@ -18,8 +18,10 @@ func main() {
 	}
 
 	urls := make([]string, len(cfg.Servers))
+	weights := make([]int, len(cfg.Servers))
 	for i, server := range cfg.Servers {
 		urls[i] = server.URL
+		weights[i] = server.Weight
 	}
 
 	var lbAlgorithm serverpool.LbAlgorithm
@@ -28,7 +30,7 @@ func main() {
 	case "RoundRobin":
 		lbAlgorithm = lbalgorithms.NewRoundRobin()
 	case "WeightedRoundRobin":
-		lbAlgorithm = lbalgorithms.NewWeightedRoundRobin([]int{1, 2, 1})
+		lbAlgorithm = lbalgorithms.NewWeightedRoundRobin(weights)
 	case "LeastConnections":
 		lbAlgorithm = lbalgorithms.NewLeastConnections()
 	case "Random":

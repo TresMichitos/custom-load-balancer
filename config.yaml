@@ -3,12 +3,15 @@ health_check:
   timeout: 5s
 
 load_balancer:
-  algorithm: "RoundRobin" 
+  algorithm: "WeightedRoundRobin" 
 
 servers:
   - url: "http://server1:8081"
+    weight: 3
   - url: "http://server2:8082" 
+    weight: 1
   - url: "http://server3:8083"
+    weight: 1
 
 metrics:
   enabled: true
