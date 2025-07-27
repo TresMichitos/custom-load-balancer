@@ -5,9 +5,11 @@ package serverpool
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strings"
 	"sync"
 	"time"
 
@@ -98,20 +100,27 @@ type ServerPool struct {
 }
 
 // Factory function to initialise a new ServerPool object
-func NewServerPool(servers []config.Server, maxLatencySamples int) *ServerPool {
+func NewServerPool(servers []config.Server, maxLatencySamples int) (*ServerPool, error) {
 	var nodes []*ServerNode
+	var errors []string
+
 	for _, server := range servers {
 		newServerNode, err := NewServerNode(server.URL, server.ArtificialLatency, maxLatencySamples)
 		if err != nil {
-			fmt.Println(err)
+			log.Printf("Failed to create server node for %s: %v", server.URL, err)
+			errors = append(errors, fmt.Sprintf("server %s: %v", server.URL, err))
 			continue
 		}
 		nodes = append(nodes, newServerNode)
+	}
+
+	if len(nodes) == 0 {
+		return nil, fmt.Errorf("no valid servers configured: %s", strings.Join(errors, ", "))
 	}
 
 	return &ServerPool{
 		All:               nodes,
 		Healthy:           []*ServerNode{},
 		MaxLatencySamples: maxLatencySamples,
-	}
+	}, nil
 }

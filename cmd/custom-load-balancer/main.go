@@ -41,7 +41,10 @@ func main() {
 		lbAlgorithm = lbalgorithms.NewRoundRobin()
 	}
 
-	serverPool := serverpool.NewServerPool(cfg.Servers, cfg.Metrics.LatencySamples)
+	serverPool, err := serverpool.NewServerPool(cfg.Servers, cfg.Metrics.LatencySamples)
+	if err != nil {
+		log.Fatalf("Failed to initialise server: %v", err)
+	}
 
 	go serverpool.HealthCheckLoop(
 		serverPool,

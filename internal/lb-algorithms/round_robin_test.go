@@ -29,7 +29,10 @@ func TestRoundRobin(t *testing.T) {
 		servers = append(servers, newServer)
 	}
 
-	var serverPool *serverpool.ServerPool = serverpool.NewServerPool(servers, 1)
+	serverPool, err := serverpool.NewServerPool(servers, 1)
+	if err != nil {
+		t.Errorf("Failed to create server pool: %v", err)
+	}
 	serverPool.Healthy = serverPool.All
 
 	// Dummy request to satisfy params
