@@ -103,6 +103,7 @@ func newMetrics(serverPool *ServerPool) *Metrics {
 	return &metrics
 }
 
+// Return the 1st, 5th, 95th, and 99th latency percentiles from a server using []LatencySamples
 func (server *ServerNode) calculateLatencyPercentiles() (p1, p5, p95, p99 int64) {
 	if len(server.LatencySamples) == 0 {
 		return 0, 0, 0, 0
@@ -121,6 +122,7 @@ func (server *ServerNode) calculateLatencyPercentiles() (p1, p5, p95, p99 int64)
 	return p1, p5, p95, p99
 }
 
+// Score distribution fairness using standard deviation on total requests across servers
 func (pool *ServerPool) calculateDistributionFairness() float64 {
 	if len(pool.All) == 1 {
 		return 0.0
