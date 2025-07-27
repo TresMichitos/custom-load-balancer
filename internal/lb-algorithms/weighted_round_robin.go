@@ -1,6 +1,4 @@
-// Round Robin load balancing algorithm
-// NOTE: If servers go down or come back online, index alignment will change.
-// Consider building a stable server list internally if stronger guarantees are needed.
+// Weighted Round Robin load balancing algorithm
 
 package lbalgorithms
 
@@ -29,20 +27,29 @@ func (wrr *weightedRoundRobin) NextServerNode(serverPool *serverpool.ServerPool,
 	wrr.mu.Lock()
 	defer wrr.mu.Unlock()
 
-	if len(serverPool.Healthy) == 1 {
-		return serverPool.Healthy[0]
-	}
-
-	// Set initial active server
+	// Set initial active server to first healthy server in pool
 	if wrr.activeServer == nil {
-		wrr.activeServer = serverPool.Healthy[0]
+		for {
+			wrr.activeServer = serverPool.All[wrr.index]
+			if !slices.Contains(serverPool.Healthy, wrr.activeServer) {
+				wrr.index = (wrr.index + 1) % len(serverPool.All)
+			} else {
+				break
+			}
+		}
 	}
 
-	// If node unhealthy or usage greater than weight move to next server
-	if wrr.currentUsage >= wrr.activeServer.Weight || !slices.Contains(serverPool.Healthy, wrr.activeServer) {
-		wrr.index = (wrr.index + 1) % len(serverPool.Healthy)
+	// If node unhealthy or usage greater than weight move to next healthy server in pool
+	if !slices.Contains(serverPool.Healthy, wrr.activeServer) || wrr.currentUsage >= wrr.activeServer.Weight {
+
+		// Find next node in pool that's healthy
+		wrr.index = (wrr.index + 1) % len(serverPool.All)
+		wrr.activeServer = serverPool.All[wrr.index]
+		for !slices.Contains(serverPool.Healthy, wrr.activeServer) {
+			wrr.index = (wrr.index + 1) % len(serverPool.All)
+			wrr.activeServer = serverPool.All[wrr.index]
+		}
 		wrr.currentUsage = 0
-		wrr.activeServer = serverPool.Healthy[wrr.index]
 	}
 
 	wrr.currentUsage++
