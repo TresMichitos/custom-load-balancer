@@ -19,6 +19,10 @@ func NewRoundRobin() *roundRobin {
 	return &roundRobin{}
 }
 
+func (roundRobin *roundRobin) GetName() string {
+	return "leastConnections"
+}
+
 // Select server node by iterating over server pool
 func (roundRobin *roundRobin) NextServerNode(serverPool *serverpool.ServerPool, _ *http.Request) *serverpool.ServerNode {
 	roundRobin.mu.Lock()

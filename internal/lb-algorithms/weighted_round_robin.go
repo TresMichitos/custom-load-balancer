@@ -24,6 +24,10 @@ func NewWeightedRoundRobin() *weightedRoundRobin {
 	return &weightedRoundRobin{}
 }
 
+func (wrr *weightedRoundRobin) GetName() string {
+	return "leastConnections"
+}
+
 // Select next server node according to weight/usage and health state
 func (wrr *weightedRoundRobin) NextServerNode(serverPool *serverpool.ServerPool, _ *http.Request) *serverpool.ServerNode {
 	wrr.mu.Lock()

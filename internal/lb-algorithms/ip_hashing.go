@@ -15,6 +15,10 @@ func NewIpHashing() *ipHashing {
 	return &ipHashing{}
 }
 
+func (ipHashing *ipHashing) GetName() string {
+	return "ipHashing"
+}
+
 func (ipHashing *ipHashing) NextServerNode(serverPool *serverpool.ServerPool, req *http.Request) *serverpool.ServerNode {
 	ipClient := req.Header.Get("X-Forwarded-For")
 
