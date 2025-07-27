@@ -14,9 +14,42 @@ func NewLeastUsedResources() *leastUsedResources {
 	return &leastUsedResources{}
 }
 
-func (leastUsedResources *leastUsedResources) NextServerNode(serverPool *serverpool.ServerPool, _ *http.Response) *serverpool.ServerNode {
+func (leastUsedResources *leastUsedResources) NextServerNode(serverPool *serverpool.ServerPool, _ *http.Request) *serverpool.ServerNode {
 	if len(serverPool.Healthy) == 1 {
 		return serverPool.Healthy[0]
 	}
+
+	stats, err := serverpool.GetDockerStats()
+	if err != nil {
+		return serverPool.Healthy[0]
+	}
+
+	var bestnode *serverpool.ServerNode
+	var lowestScore float64 = 1000
+
+	for _, node := range serverPool.Healthy {
+
+		stat, ok := stats[node.ContainerID]
+		if !ok {
+			continue
+		}
+
+		cpu := stat.CPUPerc
+		mem := stat.MemPerc
+
+		// Applying 60/40 weighting
+		score := (cpu * 0.6) + (mem * 0.4)
+
+		if score < lowestScore {
+			bestnode = node
+			lowestScore = score
+		}
+	}
+
+	if bestnode == nil {
+		return serverPool.Healthy[0] // fallback
+	}
+
+	return bestnode
 
 }
