@@ -11,9 +11,9 @@ import (
 
 // Container struct for containing data
 type ContainerStats struct {
-	ID      string  `json:"Container"`
-	CPUPerc float64 `json:"CPUPerc"`
-	MemPerc float64 `json:"MemPerc"`
+	Name    string
+	CPUPerc float64
+	MemPerc float64
 }
 
 // Helper function for seperating statistic fetching and the algorithm
@@ -44,7 +44,7 @@ func GetDockerStats() (map[string]ContainerStats, error) {
 
 		// Temp struct to match docker json output
 		var raw struct {
-			ID      string `json:"Container"`
+			Name    string `json:"Name"`
 			CPUPerc string `json:"CPUPerc"`
 			MemPerc string `json:"MemPerc"`
 		}
@@ -54,8 +54,8 @@ func GetDockerStats() (map[string]ContainerStats, error) {
 		}
 
 		// parse % utility strings to be float64
-		stats[raw.ID] = ContainerStats{
-			ID:      raw.ID,
+		stats[raw.Name] = ContainerStats{
+			Name:    raw.Name,
 			CPUPerc: ParsePercentage(raw.CPUPerc),
 			MemPerc: ParsePercentage(raw.MemPerc),
 		}

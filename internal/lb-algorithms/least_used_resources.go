@@ -29,7 +29,7 @@ func (leastUsedResources *leastUsedResources) NextServerNode(serverPool *serverp
 
 	for _, node := range serverPool.Healthy {
 
-		stat, ok := stats[node.ContainerID]
+		stat, ok := stats[node.ContainerName]
 		if !ok {
 			continue
 		}
