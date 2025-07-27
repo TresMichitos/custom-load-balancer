@@ -13,6 +13,7 @@ import (
 // Interface for load balancing algorithms
 type LbAlgorithm interface {
 	NextServerNode(*ServerPool, *http.Request) *ServerNode
+	GetName() string
 }
 
 // Struct to represent load balancer server
@@ -46,13 +47,16 @@ type Metrics struct {
 	ServerNodeMetrics    []ServerNodeMetrics `json:"serverNodeMetrics"`
 }
 
-func newMetrics(serverPool *ServerPool) *Metrics {
+func newMetrics(serverPool *ServerPool, algorithmName string) *Metrics {
 	var metrics Metrics
 	var totalLatency int64
 	var totalRequests int64
 
 	serverPool.mu.Lock()
 	defer serverPool.mu.Unlock()
+
+	metrics.Algorithm = algorithmName
+	metrics.Timestamp = time.Now()
 
 	for _, serverNode := range serverPool.Healthy {
 		serverNode.mu.Lock()
@@ -147,7 +151,8 @@ func (pool *ServerPool) calculateDistributionFairness() float64 {
 
 // Handler function to provide load balancer metrics
 func (server *Server) metricsHandler(w http.ResponseWriter, r *http.Request) {
-	metrics := newMetrics(server.ServerPool)
+	algorithmName := server.LbAlgorithm.GetName()
+	metrics := newMetrics(server.ServerPool, algorithmName)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(metrics)
 }
