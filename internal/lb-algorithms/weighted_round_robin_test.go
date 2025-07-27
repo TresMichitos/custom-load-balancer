@@ -4,21 +4,27 @@ package lbalgorithms
 
 import (
 	"net/http"
+	"strconv"
 	"testing"
 
+	config "github.com/TresMichitos/custom-load-balancer/internal/config"
 	serverpool "github.com/TresMichitos/custom-load-balancer/internal/server-pool"
 )
 
 // Test that algorithm returns expected server nodes
 func TestWeightedRoundRobin(t *testing.T) {
-	var lbAlgorithm serverpool.LbAlgorithm = NewWeightedRoundRobin([]int{1, 2, 1})
+	weights := []int{1, 2, 1}
+	var lbAlgorithm serverpool.LbAlgorithm = NewWeightedRoundRobin(weights)
 
-	var urls []string = []string{
-		"http://localhost:8081",
-		"http://localhost:8082",
-		"http://localhost:8083",
+	servers := make([]config.Server, 0, 3)
+	for i := 1; i <= 3; i++ {
+		newServer := config.Server{
+			URL: "http://localhost:808" + strconv.Itoa(i),
+		}
+		servers = append(servers, newServer)
 	}
-	var serverPool *serverpool.ServerPool = serverpool.NewServerPool(urls, 1)
+
+	var serverPool *serverpool.ServerPool = serverpool.NewServerPool(servers, 1)
 	serverPool.Healthy = serverPool.All
 
 	var expectedUrlsRouted []string = []string{

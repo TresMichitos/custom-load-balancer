@@ -18,7 +18,7 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.server
-    command: ["--latency", "-1s"]
+    command: ["--latency", "-1s"] # config.yaml preferred
     environment:
       - PORT=8081
       - SERVER_ID=1
@@ -31,7 +31,7 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.server
-    command: ["--latency", "-1s"]
+    command: ["--latency", "-1s"] # config.yaml preferred
     environment:
       - PORT=8082
       - SERVER_ID=2
@@ -44,7 +44,7 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.server
-    command: ["--latency", "-1s"]
+    command: ["--latency", "-1s"] # config.yaml preferred
     environment:
       - PORT=8083
       - SERVER_ID=3

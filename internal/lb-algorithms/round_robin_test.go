@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"testing"
 
+	config "github.com/TresMichitos/custom-load-balancer/internal/config"
 	serverpool "github.com/TresMichitos/custom-load-balancer/internal/server-pool"
 )
 
@@ -19,7 +20,16 @@ func TestRoundRobin(t *testing.T) {
 		"http://localhost:8082",
 		"http://localhost:8083",
 	}
-	var serverPool *serverpool.ServerPool = serverpool.NewServerPool(urls, 1)
+
+	servers := make([]config.Server, 0, 3)
+	for _, url := range urls {
+		newServer := config.Server{
+			URL: url,
+		}
+		servers = append(servers, newServer)
+	}
+
+	var serverPool *serverpool.ServerPool = serverpool.NewServerPool(servers, 1)
 	serverPool.Healthy = serverPool.All
 
 	// Dummy request to satisfy params

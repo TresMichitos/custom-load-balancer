@@ -41,7 +41,7 @@ func main() {
 		lbAlgorithm = lbalgorithms.NewRoundRobin()
 	}
 
-	serverPool := serverpool.NewServerPool(urls, cfg.Metrics.LatencySamples)
+	serverPool := serverpool.NewServerPool(cfg.Servers, cfg.Metrics.LatencySamples)
 
 	go serverpool.HealthCheckLoop(
 		serverPool,

@@ -10,12 +10,15 @@ import (
 	"net/url"
 	"sync"
 	"time"
+
+	config "github.com/TresMichitos/custom-load-balancer/internal/config"
 )
 
 // Struct to represent each node server we forward to
 type ServerNode struct {
 	URL               string
 	ReverseProxy      *httputil.ReverseProxy
+	ArtificialLatency time.Duration
 	ActiveConnections int
 	RequestCount      int64
 	SuccessCount      int64
@@ -37,21 +40,24 @@ func (rw *responseWriterWrapper) WriteHeader(code int) {
 }
 
 // Factory function to initialise a new ServerNode object
-func NewServerNode(urlInput string, maxLatencySamples int) (*ServerNode, error) {
+func NewServerNode(urlInput string, artificialLatency time.Duration, maxLatencySamples int) (*ServerNode, error) {
 	url, err := url.Parse(urlInput)
 	if err != nil {
 		return nil, errors.New("invalid URL")
 	}
 	return &ServerNode{
-		URL:            urlInput,
-		ReverseProxy:   httputil.NewSingleHostReverseProxy(url),
-		LatencySamples: make([]int64, 0, maxLatencySamples),
+		URL:               urlInput,
+		ReverseProxy:      httputil.NewSingleHostReverseProxy(url),
+		ArtificialLatency: artificialLatency,
+		LatencySamples:    make([]int64, 0, maxLatencySamples),
 	}, nil
 }
 
 // Proxy function to forward HTTP request to server node
 func (serverNode *ServerNode) ForwardRequest(w http.ResponseWriter, r *http.Request, serverPool *ServerPool) {
 	startTime := time.Now()
+
+	time.Sleep(serverNode.ArtificialLatency)
 
 	// Pre-metrics
 	serverNode.mu.Lock()
@@ -92,10 +98,10 @@ type ServerPool struct {
 }
 
 // Factory function to initialise a new ServerPool object
-func NewServerPool(urls []string, maxLatencySamples int) *ServerPool {
+func NewServerPool(servers []config.Server, maxLatencySamples int) *ServerPool {
 	var nodes []*ServerNode
-	for _, url := range urls {
-		newServerNode, err := NewServerNode(url, maxLatencySamples)
+	for _, server := range servers {
+		newServerNode, err := NewServerNode(server.URL, server.ArtificialLatency, maxLatencySamples)
 		if err != nil {
 			fmt.Println(err)
 			continue

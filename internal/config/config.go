@@ -7,6 +7,12 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+type Server struct {
+	URL               string        `yaml:"url"`
+	Weight            int           `yaml:"weight"`
+	ArtificialLatency time.Duration `yaml:"artificial_latency"`
+}
+
 type Config struct {
 	Server struct {
 		Port    int           `yaml:"port"`
@@ -22,10 +28,7 @@ type Config struct {
 		Algorithm string `yaml:"algorithm"`
 	} `yaml:"load_balancer"`
 
-	Servers []struct {
-		URL    string `yaml:"url"`
-		Weight int    `yaml:"weight"`
-	} `yaml:"servers"`
+	Servers []Server `yaml:"servers"`
 
 	Metrics struct {
 		Enabled        bool `yaml:"enabled"`
