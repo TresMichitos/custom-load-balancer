@@ -18,7 +18,6 @@ var (
 	numClients      = flag.Int("clients", 1, "Number of concurrent clients")
 	duration        = flag.Duration("duration", 30*time.Second, "Duration of test")
 	requestRate     = flag.Float64("rate", 1, "Requests per second per client")
-	// outputFile      = flag.String("file", "", "CSV output file for results")
 )
 
 func main() {
