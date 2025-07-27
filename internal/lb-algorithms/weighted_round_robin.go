@@ -1,9 +1,12 @@
 // Round Robin load balancing algorithm
+// NOTE: If servers go down or come back online, index alignment will change.
+// Consider building a stable server list internally if stronger guarantees are needed.
 
 package lbalgorithms
 
 import (
 	"net/http"
+	"slices"
 	"sync"
 
 	serverpool "github.com/TresMichitos/custom-load-balancer/internal/server-pool"
@@ -11,37 +14,37 @@ import (
 
 // Struct to implement serverpool.LbAlgorithm interface
 type weightedRoundRobin struct {
-	weightRatio []int // Slice of the weight ratio for each serverNode at corresponding
-	// index in serverPool
-	index               int
-	weightRatioUseCount int // Number of times the weight ratio at index
-	// has been used since index incremented
-	mu sync.Mutex
+	index        int
+	currentUsage int
+	activeServer *serverpool.ServerNode
+	mu           sync.Mutex
 }
 
-func NewWeightedRoundRobin(weightRatio []int) *weightedRoundRobin {
-	return &weightedRoundRobin{weightRatio: weightRatio, weightRatioUseCount: 1}
+func NewWeightedRoundRobin() *weightedRoundRobin {
+	return &weightedRoundRobin{}
 }
 
-// Select server node following weight ratio
-func (weightedRoundRobin *weightedRoundRobin) NextServerNode(serverPool *serverpool.ServerPool, _ *http.Request) *serverpool.ServerNode {
-	weightedRoundRobin.mu.Lock()
-	defer weightedRoundRobin.mu.Unlock()
+// Select next server node according to weight/usage and health state
+func (wrr *weightedRoundRobin) NextServerNode(serverPool *serverpool.ServerPool, _ *http.Request) *serverpool.ServerNode {
+	wrr.mu.Lock()
+	defer wrr.mu.Unlock()
 
-	// Increment index if server node is about to be used more times than its ratio value
-	// since index incremented
-	if weightedRoundRobin.weightRatioUseCount > weightedRoundRobin.weightRatio[weightedRoundRobin.index] {
-		weightedRoundRobin.index++
-
-		if weightedRoundRobin.index >= len(serverPool.Healthy) {
-			weightedRoundRobin.index = 0
-		}
-
-		weightedRoundRobin.weightRatioUseCount = 1
+	if len(serverPool.Healthy) == 1 {
+		return serverPool.Healthy[0]
 	}
 
-	server := serverPool.Healthy[weightedRoundRobin.index]
-	weightedRoundRobin.weightRatioUseCount++
+	// Set initial active server
+	if wrr.activeServer == nil {
+		wrr.activeServer = serverPool.Healthy[0]
+	}
 
-	return server
+	// If node unhealthy or usage greater than weight move to next server
+	if wrr.currentUsage >= wrr.activeServer.Weight || !slices.Contains(serverPool.Healthy, wrr.activeServer) {
+		wrr.index = (wrr.index + 1) % len(serverPool.Healthy)
+		wrr.currentUsage = 0
+		wrr.activeServer = serverPool.Healthy[wrr.index]
+	}
+
+	wrr.currentUsage++
+	return wrr.activeServer
 }

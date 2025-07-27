@@ -13,13 +13,13 @@ import (
 
 // Test that algorithm returns expected server nodes
 func TestWeightedRoundRobin(t *testing.T) {
-	weights := []int{1, 2, 1}
-	var lbAlgorithm serverpool.LbAlgorithm = NewWeightedRoundRobin(weights)
+	var lbAlgorithm serverpool.LbAlgorithm = NewWeightedRoundRobin()
 
 	servers := make([]config.Server, 0, 3)
 	for i := 1; i <= 3; i++ {
 		newServer := config.Server{
-			URL: "http://localhost:808" + strconv.Itoa(i),
+			URL:    "http://localhost:808" + strconv.Itoa(i),
+			Weight: i,
 		}
 		servers = append(servers, newServer)
 	}
@@ -34,6 +34,8 @@ func TestWeightedRoundRobin(t *testing.T) {
 		"http://localhost:8081",
 		"http://localhost:8082",
 		"http://localhost:8082",
+		"http://localhost:8083",
+		"http://localhost:8083",
 		"http://localhost:8083",
 	}
 

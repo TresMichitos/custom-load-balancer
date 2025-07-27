@@ -17,18 +17,13 @@ func main() {
 		log.Fatal("Failed to load config:", err)
 	}
 
-	weights := make([]int, len(cfg.Servers))
-	for i, server := range cfg.Servers {
-		weights[i] = server.Weight
-	}
-
 	var lbAlgorithm serverpool.LbAlgorithm
 
 	switch cfg.LoadBalancer.Algorithm {
 	case "RoundRobin":
 		lbAlgorithm = lbalgorithms.NewRoundRobin()
 	case "WeightedRoundRobin":
-		lbAlgorithm = lbalgorithms.NewWeightedRoundRobin(weights)
+		lbAlgorithm = lbalgorithms.NewWeightedRoundRobin()
 	case "LeastConnections":
 		lbAlgorithm = lbalgorithms.NewLeastConnections()
 	case "Random":
