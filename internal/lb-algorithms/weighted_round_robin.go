@@ -4,7 +4,6 @@ package lbalgorithms
 
 import (
 	"net/http"
-	"slices"
 	"sync"
 
 	serverpool "github.com/TresMichitos/custom-load-balancer/internal/server-pool"
@@ -27,27 +26,26 @@ func (wrr *weightedRoundRobin) NextServerNode(serverPool *serverpool.ServerPool,
 	wrr.mu.Lock()
 	defer wrr.mu.Unlock()
 
-	// Set initial active server to first healthy server in pool
+	// Set initial active server
 	if wrr.activeServer == nil {
-		for {
-			wrr.activeServer = serverPool.All[wrr.index]
-			if !slices.Contains(serverPool.Healthy, wrr.activeServer) {
-				wrr.index = (wrr.index + 1) % len(serverPool.All)
-			} else {
-				break
-			}
-		}
+		wrr.activeServer = serverPool.All[wrr.index]
+	}
+
+	// Map for O(1) subsequent lookups
+	healthyMap := make(map[*serverpool.ServerNode]bool, len(serverPool.Healthy))
+	for _, server := range serverPool.Healthy {
+		healthyMap[server] = true
 	}
 
 	// If node unhealthy or usage greater than weight move to next healthy server in pool
-	if !slices.Contains(serverPool.Healthy, wrr.activeServer) || wrr.currentUsage >= wrr.activeServer.Weight {
-
+	if !healthyMap[wrr.activeServer] || wrr.currentUsage >= wrr.activeServer.Weight {
 		// Find next node in pool that's healthy
-		wrr.index = (wrr.index + 1) % len(serverPool.All)
-		wrr.activeServer = serverPool.All[wrr.index]
-		for !slices.Contains(serverPool.Healthy, wrr.activeServer) {
+		for {
 			wrr.index = (wrr.index + 1) % len(serverPool.All)
 			wrr.activeServer = serverPool.All[wrr.index]
+			if healthyMap[wrr.activeServer] {
+				break
+			}
 		}
 		wrr.currentUsage = 0
 	}
