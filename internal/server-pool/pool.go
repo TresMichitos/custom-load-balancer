@@ -19,6 +19,7 @@ import (
 // Struct to represent each node server we forward to
 type ServerNode struct {
 	URL               string
+	ContainerName     string
 	ReverseProxy      *httputil.ReverseProxy
 	Weight            int
 	ArtificialLatency time.Duration
@@ -48,8 +49,10 @@ func NewServerNode(urlInput string, weight int, artificialLatency time.Duration,
 	if err != nil {
 		return nil, errors.New("invalid URL")
 	}
+	host := url.Hostname()
 	return &ServerNode{
 		URL:               urlInput,
+		ContainerName:     host,
 		ReverseProxy:      httputil.NewSingleHostReverseProxy(url),
 		Weight:            weight,
 		ArtificialLatency: artificialLatency,

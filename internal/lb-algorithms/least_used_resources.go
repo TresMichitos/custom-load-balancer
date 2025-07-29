@@ -3,6 +3,7 @@
 package lbalgorithms
 
 import (
+	"fmt"
 	"net/http"
 
 	serverpool "github.com/TresMichitos/custom-load-balancer/internal/server-pool"
@@ -39,6 +40,7 @@ func (leastUsedResources *leastUsedResources) NextServerNode(serverPool *serverp
 
 		// Applying 60/40 weighting
 		score := (cpu * 0.6) + (mem * 0.4)
+		fmt.Println(score)
 
 		if score < lowestScore {
 			bestnode = node
