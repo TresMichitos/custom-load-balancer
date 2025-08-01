@@ -6,6 +6,7 @@ import (
 	"log"
 
 	config "github.com/TresMichitos/custom-load-balancer/internal/config"
+	dockerstats "github.com/TresMichitos/custom-load-balancer/internal/dockerstats"
 	lbalgorithms "github.com/TresMichitos/custom-load-balancer/internal/lb-algorithms"
 	serverpool "github.com/TresMichitos/custom-load-balancer/internal/server-pool"
 )
@@ -16,6 +17,14 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to load config:", err)
 	}
+
+	dockerClient, err := dockerstats.NewDockerClient()
+	if err != nil {
+		log.Fatalf("Failed Docker client init: %v", err)
+	}
+	defer dockerClient.Close()
+
+	dockerstats.StartStatsPolling(dockerClient, cfg.Docker.PollingInterval)
 
 	var lbAlgorithm serverpool.LbAlgorithm
 

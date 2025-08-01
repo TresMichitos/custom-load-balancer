@@ -35,6 +35,12 @@ type Config struct {
 		LatencySamples int  `yaml:"latency_samples"`
 	} `yaml:"metrics"`
 
+	Docker struct {
+		Enabled         bool          `yaml:"enabled"`
+		PollingInterval time.Duration `yaml:"polling_interval"`
+		ContainerStats  bool          `yaml:"container_stats"`
+	} `yaml:"docker"`
+
 	Clients struct {
 		Timeout  time.Duration `yaml:"timeout"`
 		Interval time.Duration `yaml:"interval"`
