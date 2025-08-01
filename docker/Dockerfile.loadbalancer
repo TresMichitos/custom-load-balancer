@@ -26,6 +26,9 @@ RUN go build -o custom-load-balancer ./cmd/custom-load-balancer/main.go
 # Base image - lightweight linux alpine
 FROM alpine:latest
 
+# Install Docker CLI for stats
+RUN apk add --no-cache docker-cli
+
 # Specify the directory inside the runtime environment
 WORKDIR /usr/local/bin
 
