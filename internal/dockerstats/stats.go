@@ -1,12 +1,16 @@
 // Checks instance of sever's utilisation statistics
 
-package serverpool
+package dockerstats
 
 import (
 	"encoding/json"
+	"log"
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/docker/docker/client"
 )
 
 // Container struct for containing data
@@ -16,12 +20,14 @@ type ContainerStats struct {
 	MemPerc float64
 }
 
+func StartStatsPolling(dockerClient *client.Client, interval time.Duration) {
+}
+
 // Helper function for seperating statistic fetching and the algorithm
 func GetDockerStats() (map[string]ContainerStats, error) {
 	// Docker command "docker stats --no-stream --format {{json .}}"
 	// this grabs that instant of server stats and formats it to json
 	cmd := exec.Command("docker", "stats", "--no-stream", "--format", "{{json .}}")
-
 	// Checks if command can be run without error
 	output, err := cmd.Output()
 	if err != nil {
@@ -36,6 +42,7 @@ func GetDockerStats() (map[string]ContainerStats, error) {
 	lines := strings.Split(string(output), "\n")
 
 	for _, line := range lines {
+		log.Printf("line: %s", line)
 		line = strings.TrimSpace(line)
 
 		if line == "" {
@@ -50,6 +57,7 @@ func GetDockerStats() (map[string]ContainerStats, error) {
 		}
 
 		if err := json.Unmarshal([]byte(line), &raw); err != nil {
+			log.Printf("error in unmarshalling %s, %v", line, err)
 			continue
 		}
 
