@@ -24,7 +24,7 @@ Custom implementation of a load balancer using Go.
 
 Run with:
   ```
-  go run ./cmd/custom-load-balancer/ --algorithm {'RoundRobin'|...}
+  go run ./cmd/custom-load-balancer/
   ```
 Or:
   ```
@@ -37,7 +37,7 @@ Send requests to load balancer with:
   ```
 Or:
   ```
-  go run demo/client/client.go http://localhost:8080 15
+  go run demo/client/client.go --url ... --clients ... --duration ... --rate ...
   ```
 
 Shut down containers with:
@@ -128,7 +128,10 @@ Run Integration Tests with:
 ├── integration                           # Integration tests for custom load balancer
 │   └── integration_test.go
 ├── internal                              # Package imports
+│   ├── config                            # Utilities to load configuration
+│   │   └── config.go
 │   ├── lb-algorithms                     # Implementations of load balancing algorithms
+│   │   ├── ip_hashing.go
 │   │   ├── least_connections.go
 │   │   ├── random.go
 │   │   ├── round_robin.go
@@ -139,10 +142,13 @@ Run Integration Tests with:
 │       ├── health_check.go               # Manage health checks for server pool
 │       ├── pool.go                       # Implementation of server nodes and server pool
 │       └── server.go                     # Implementation of load balancer server struct and definition of LbAlgorithm interface
+├── notebooks                             # Jupyter notebooks
 ├── .dockerignore                         # Similar to .gitignore, outlines files for the docker container to ignore
+├── .gitattributes
 ├── .gitignore
 ├── README.md
 ├── compose.yml                           # File used for building the docker containers and describing how they should interact with each other
+├── config.yml                            # Main configuration file for load balancer
 ├── go.mod                                # Go module definition (tracks dependencies and package name)
 └── servers.json                          # Server list
 ```
