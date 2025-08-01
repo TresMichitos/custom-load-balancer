@@ -3,9 +3,10 @@
 package lbalgorithms
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 
+	dockerstats "github.com/TresMichitos/custom-load-balancer/internal/dockerstats"
 	serverpool "github.com/TresMichitos/custom-load-balancer/internal/server-pool"
 )
 
@@ -20,8 +21,10 @@ func (leastUsedResources *leastUsedResources) NextServerNode(serverPool *serverp
 		return serverPool.Healthy[0]
 	}
 
-	stats, err := serverpool.GetDockerStats()
+	stats, err := dockerstats.GetDockerStats()
+
 	if err != nil {
+		log.Printf("There was an error, %v", err)
 		return serverPool.Healthy[0]
 	}
 
@@ -29,27 +32,34 @@ func (leastUsedResources *leastUsedResources) NextServerNode(serverPool *serverp
 	var lowestScore float64 = 1000
 
 	for _, node := range serverPool.Healthy {
+		log.Printf("container nhame: %s ", node.ContainerName)
+
+		for k := range stats {
+			log.Printf("container stats: %s ", k)
+		}
 
 		stat, ok := stats[node.ContainerName]
 		if !ok {
 			continue
 		}
-
+		log.Printf("Container %s CPU: %.2f%%, Mem: %.2f%%", stat.Name, stat.CPUPerc, stat.MemPerc)
 		cpu := stat.CPUPerc
 		mem := stat.MemPerc
 
 		// Applying 60/40 weighting
 		score := (cpu * 0.6) + (mem * 0.4)
-		fmt.Println(score)
+		log.Printf("score: %f", score)
 
 		if score < lowestScore {
 			bestnode = node
 			lowestScore = score
+			log.Printf("lowestscore: %f", lowestScore)
 		}
 	}
 
 	if bestnode == nil {
-		return serverPool.Healthy[0] // fallback
+		log.Printf("No suitable node found by resource stats; using fallback node")
+		return serverPool.Healthy[0]
 	}
 
 	return bestnode
