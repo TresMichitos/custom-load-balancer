@@ -6,6 +6,7 @@ import (
 	"log"
 
 	config "github.com/TresMichitos/custom-load-balancer/internal/config"
+	dockerstats "github.com/TresMichitos/custom-load-balancer/internal/dockerstats"
 	lbalgorithms "github.com/TresMichitos/custom-load-balancer/internal/lb-algorithms"
 	serverpool "github.com/TresMichitos/custom-load-balancer/internal/server-pool"
 )
@@ -17,6 +18,14 @@ func main() {
 		log.Fatal("Failed to load config:", err)
 	}
 
+	dockerClient, err := dockerstats.NewDockerClient()
+	if err != nil {
+		log.Fatalf("Failed Docker client init: %v", err)
+	}
+	defer dockerClient.Close()
+
+	dockerstats.StartStatsPolling(dockerClient, cfg.Docker.PollingInterval)
+
 	var lbAlgorithm serverpool.LbAlgorithm
 
 	switch cfg.LoadBalancer.Algorithm {
@@ -26,6 +35,8 @@ func main() {
 		lbAlgorithm = lbalgorithms.NewWeightedRoundRobin()
 	case "LeastConnections":
 		lbAlgorithm = lbalgorithms.NewLeastConnections()
+	case "LeastUsedResources":
+		lbAlgorithm = lbalgorithms.NewLeastUsedResources()
 	case "Random":
 		lbAlgorithm = lbalgorithms.NewRandom()
 	case "IpHashing":

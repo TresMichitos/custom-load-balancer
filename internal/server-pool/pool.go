@@ -19,6 +19,7 @@ import (
 // Struct to represent each node server we forward to
 type ServerNode struct {
 	URL               string
+	ContainerName     string
 	ReverseProxy      *httputil.ReverseProxy
 	Weight            int
 	ArtificialLatency time.Duration
@@ -43,13 +44,14 @@ func (rw *responseWriterWrapper) WriteHeader(code int) {
 }
 
 // Factory function to initialise a new ServerNode object
-func NewServerNode(urlInput string, weight int, artificialLatency time.Duration, maxLatencySamples int) (*ServerNode, error) {
+func NewServerNode(urlInput string, containerName string, weight int, artificialLatency time.Duration, maxLatencySamples int) (*ServerNode, error) {
 	url, err := url.Parse(urlInput)
 	if err != nil {
 		return nil, errors.New("invalid URL")
 	}
 	return &ServerNode{
 		URL:               urlInput,
+		ContainerName:     containerName,
 		ReverseProxy:      httputil.NewSingleHostReverseProxy(url),
 		Weight:            weight,
 		ArtificialLatency: artificialLatency,
@@ -107,7 +109,7 @@ func NewServerPool(servers []config.Server, maxLatencySamples int) (*ServerPool,
 	var errors []string
 
 	for _, server := range servers {
-		newServerNode, err := NewServerNode(server.URL, server.Weight, server.ArtificialLatency, maxLatencySamples)
+		newServerNode, err := NewServerNode(server.URL, server.ContainerName, server.Weight, server.ArtificialLatency, maxLatencySamples)
 		if err != nil {
 			log.Printf("Failed to create server node for %s: %v", server.URL, err)
 			errors = append(errors, fmt.Sprintf("server %s: %v", server.URL, err))

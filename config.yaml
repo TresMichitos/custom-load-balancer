@@ -7,15 +7,24 @@ load_balancer:
 
 servers:
   - url: "http://server1:8081"
+    container: "server1"
     weight: 1
     artificial_latency: -1ms
   - url: "http://server2:8082" 
+    container: "server2"
     weight: 1
     artificial_latency: -1ms
   - url: "http://server3:8083"
+    container: "server3"
     weight: 1
     artificial_latency: -1ms
 
 metrics:
   enabled: true
   latency_samples: 100
+
+docker:
+  enabled: true
+  polling_interval: 1700ms
+  container_stats: true
+  cache_enabled: true

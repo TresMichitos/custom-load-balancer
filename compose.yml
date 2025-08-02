@@ -7,6 +7,7 @@ services:
       - "8080:8080"
     volumes:
       - ./config.yaml:/usr/local/bin/config.yaml
+      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - server1
       - server2
@@ -15,6 +16,7 @@ services:
       - lb-network
 
   server1:
+    container_name: server1
     build:
       context: .
       dockerfile: docker/Dockerfile.server
@@ -24,10 +26,13 @@ services:
       - SERVER_ID=1
     ports:
       - "8081:8081"
+    labels:
+      - role=server
     networks:
       - lb-network
 
   server2:
+    container_name: server2
     build:
       context: .
       dockerfile: docker/Dockerfile.server
@@ -37,10 +42,13 @@ services:
       - SERVER_ID=2
     ports:
       - "8082:8082"
+    labels:
+      - role=server
     networks:
       - lb-network
 
   server3:
+    container_name: server3
     build:
       context: .
       dockerfile: docker/Dockerfile.server
@@ -50,6 +58,8 @@ services:
       - SERVER_ID=3
     ports:
       - "8083:8083"
+    labels:
+      - role=server
     networks:
       - lb-network
 networks:
