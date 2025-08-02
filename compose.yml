@@ -16,6 +16,7 @@ services:
       - lb-network
 
   server1:
+    container_name: server1
     build:
       context: .
       dockerfile: docker/Dockerfile.server
@@ -31,6 +32,7 @@ services:
       - lb-network
 
   server2:
+    container_name: server2
     build:
       context: .
       dockerfile: docker/Dockerfile.server
@@ -46,6 +48,7 @@ services:
       - lb-network
 
   server3:
+    container_name: server3
     build:
       context: .
       dockerfile: docker/Dockerfile.server
