@@ -115,8 +115,8 @@ func fetchDockerStats(dockerClient *client.Client) (map[string]ContainerStats, e
 }
 
 // Returns cached Docker stats
-func GetDockerStats() (map[string]ContainerStats, error) {
+func GetDockerStats() map[string]ContainerStats {
 	cacheMutex.RLock()
 	defer cacheMutex.RUnlock()
-	return statsCache, nil
+	return statsCache
 }

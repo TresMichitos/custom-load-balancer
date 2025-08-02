@@ -27,11 +27,7 @@ func (lur *leastUsedResources) NextServerNode(serverPool *serverpool.ServerPool,
 		return serverPool.Healthy[0]
 	}
 
-	stats, err := dockerstats.GetDockerStats()
-
-	if err != nil {
-		return serverPool.Healthy[0]
-	}
+	stats := dockerstats.GetDockerStats()
 
 	var bestnode *serverpool.ServerNode
 	lowestScore := math.MaxFloat64
