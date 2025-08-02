@@ -4,7 +4,7 @@
 # ----- Stage 1 -----
 # Build the Go project using the official lightweight Go base-image
 # Alias as builder
-FROM golang:1.22.2-alpine AS builder
+FROM golang:1.23-alpine AS builder
 
 # Specify the directory for building the Go app
 WORKDIR /app
@@ -25,9 +25,6 @@ RUN go build -o custom-load-balancer ./cmd/custom-load-balancer/main.go
 # ----- Stage 2 -----
 # Base image - lightweight linux alpine
 FROM alpine:latest
-
-# Install Docker CLI for stats
-RUN apk add --no-cache docker-cli
 
 # Specify the directory inside the runtime environment
 WORKDIR /usr/local/bin

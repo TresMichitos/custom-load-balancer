@@ -4,7 +4,7 @@
 # ----- Stage 1 -----
 # Build the Go project using the official lightweight Go base-image
 # Alias as builder
-FROM golang:1.22.2-alpine AS builder
+FROM golang:1.23-alpine AS builder
 
 # Specify the directory for building the Go app
 WORKDIR /app
