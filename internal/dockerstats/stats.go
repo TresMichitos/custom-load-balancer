@@ -59,7 +59,7 @@ func fetchDockerStats(dockerClient *client.Client) (map[string]ContainerStats, e
 	for _, container := range containers {
 		// Fetch stats for container
 		// boolean false means we don't want to stream stats
-		response, err := dockerClient.ContainerStats(ctx, container.ID, true)
+		response, err := dockerClient.ContainerStats(ctx, container.ID, false)
 
 		if err != nil {
 			continue
@@ -68,18 +68,8 @@ func fetchDockerStats(dockerClient *client.Client) (map[string]ContainerStats, e
 		// Decode the stat data
 		decoder := json.NewDecoder(response.Body)
 
-		var previous, current types.StatsJSON
-		if err := decoder.Decode(&previous); err != nil {
-			response.Body.Close()
-			continue
-		}
-
-		// Sleep is to ensure samples are not too close together
-		// This is to avoid issues with CPU usage calculation
-		// as it can lead to 0% CPU usage if samples are too close
-		time.Sleep(1000 * time.Millisecond)
-
-		if err := decoder.Decode(&current); err != nil {
+		var stat types.StatsJSON
+		if err := decoder.Decode(&stat); err != nil {
 			response.Body.Close()
 			continue
 		}
@@ -87,21 +77,21 @@ func fetchDockerStats(dockerClient *client.Client) (map[string]ContainerStats, e
 		// Close the response body
 		response.Body.Close()
 
-		cpuContainerDelta := float64(current.CPUStats.CPUUsage.TotalUsage - previous.CPUStats.CPUUsage.TotalUsage)
-		cpuSystemDelta := float64(current.CPUStats.SystemUsage - previous.CPUStats.SystemUsage)
+		cpuContainerDelta := float64(stat.CPUStats.CPUUsage.TotalUsage - stat.PreCPUStats.CPUUsage.TotalUsage)
+		cpuSystemDelta := float64(stat.CPUStats.SystemUsage - stat.PreCPUStats.SystemUsage)
 
 		cpuPercent := 0.0
 
 		// Calculate CPU percentage (Usage)
 		if (cpuContainerDelta > 0.0) && (cpuSystemDelta > 0.0) {
-			cpuPercent = (cpuContainerDelta / cpuSystemDelta) * float64(len(current.CPUStats.CPUUsage.PercpuUsage)) * 100
+			cpuPercent = (cpuContainerDelta / cpuSystemDelta) * float64(len(stat.CPUStats.CPUUsage.PercpuUsage)) * 100
 		}
 
 		memPercent := 0.0
 
 		// Calculate Memory percentage (Usage)
-		if current.MemoryStats.Limit > 0 {
-			memPercent = float64(current.MemoryStats.Usage) / float64(current.MemoryStats.Limit) * 100
+		if stat.MemoryStats.Limit > 0 {
+			memPercent = float64(stat.MemoryStats.Usage) / float64(stat.MemoryStats.Limit) * 100
 		}
 
 		stats[container.Names[0][1:]] = ContainerStats{
