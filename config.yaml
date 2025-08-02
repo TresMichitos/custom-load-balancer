@@ -3,7 +3,7 @@ health_check:
   timeout: 5s
 
 load_balancer:
-  algorithm: "LeastUsedResources" 
+  algorithm: "RoundRobin" 
 
 servers:
   - url: "http://server1:8081"
