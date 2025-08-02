@@ -56,50 +56,61 @@ func fetchDockerStats(dockerClient *client.Client) (map[string]ContainerStats, e
 	}
 
 	stats := make(map[string]ContainerStats)
+	var wg sync.WaitGroup
+	statsMutex := sync.Mutex{}
+
 	for _, container := range containers {
-		// Fetch stats for container
-		// boolean false means we don't want to stream stats
-		response, err := dockerClient.ContainerStats(ctx, container.ID, false)
+		wg.Add(1)
+		go func(container types.Container) {
+			defer wg.Done()
 
-		if err != nil {
-			continue
-		}
+			// Fetch stats for container
+			// boolean false means we don't want to stream stats
+			response, err := dockerClient.ContainerStats(ctx, container.ID, false)
 
-		// Decode the stat data
-		decoder := json.NewDecoder(response.Body)
+			if err != nil {
+				return
+			}
 
-		var stat types.StatsJSON
-		if err := decoder.Decode(&stat); err != nil {
+			// Decode the stat data
+			decoder := json.NewDecoder(response.Body)
+
+			var stat types.StatsJSON
+			if err := decoder.Decode(&stat); err != nil {
+				response.Body.Close()
+				return
+			}
+
+			// Close the response body
 			response.Body.Close()
-			continue
-		}
 
-		// Close the response body
-		response.Body.Close()
+			cpuContainerDelta := float64(stat.CPUStats.CPUUsage.TotalUsage - stat.PreCPUStats.CPUUsage.TotalUsage)
+			cpuSystemDelta := float64(stat.CPUStats.SystemUsage - stat.PreCPUStats.SystemUsage)
 
-		cpuContainerDelta := float64(stat.CPUStats.CPUUsage.TotalUsage - stat.PreCPUStats.CPUUsage.TotalUsage)
-		cpuSystemDelta := float64(stat.CPUStats.SystemUsage - stat.PreCPUStats.SystemUsage)
+			cpuPercent := 0.0
 
-		cpuPercent := 0.0
+			// Calculate CPU percentage (Usage)
+			if (cpuContainerDelta > 0.0) && (cpuSystemDelta > 0.0) {
+				cpuPercent = (cpuContainerDelta / cpuSystemDelta) * float64(len(stat.CPUStats.CPUUsage.PercpuUsage)) * 100
+			}
 
-		// Calculate CPU percentage (Usage)
-		if (cpuContainerDelta > 0.0) && (cpuSystemDelta > 0.0) {
-			cpuPercent = (cpuContainerDelta / cpuSystemDelta) * float64(len(stat.CPUStats.CPUUsage.PercpuUsage)) * 100
-		}
+			memPercent := 0.0
 
-		memPercent := 0.0
+			// Calculate Memory percentage (Usage)
+			if stat.MemoryStats.Limit > 0 {
+				memPercent = float64(stat.MemoryStats.Usage) / float64(stat.MemoryStats.Limit) * 100
+			}
 
-		// Calculate Memory percentage (Usage)
-		if stat.MemoryStats.Limit > 0 {
-			memPercent = float64(stat.MemoryStats.Usage) / float64(stat.MemoryStats.Limit) * 100
-		}
-
-		stats[container.Names[0][1:]] = ContainerStats{
-			Name:    container.Names[0][1:],
-			CPUPerc: cpuPercent,
-			MemPerc: memPercent,
-		}
+			statsMutex.Lock()
+			stats[container.Names[0][1:]] = ContainerStats{
+				Name:    container.Names[0][1:],
+				CPUPerc: cpuPercent,
+				MemPerc: memPercent,
+			}
+			statsMutex.Unlock()
+		}(container)
 	}
+	wg.Wait()
 	return stats, nil
 }
 

@@ -25,6 +25,6 @@ metrics:
 
 docker:
   enabled: true
-  polling_interval: 500ms
+  polling_interval: 1700ms
   container_stats: true
   cache_enabled: true
