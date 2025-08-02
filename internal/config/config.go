@@ -9,6 +9,7 @@ import (
 
 type Server struct {
 	URL               string        `yaml:"url"`
+	ContainerName     string        `yaml:"container"`
 	Weight            int           `yaml:"weight"`
 	ArtificialLatency time.Duration `yaml:"artificial_latency"`
 }
@@ -39,6 +40,7 @@ type Config struct {
 		Enabled         bool          `yaml:"enabled"`
 		PollingInterval time.Duration `yaml:"polling_interval"`
 		ContainerStats  bool          `yaml:"container_stats"`
+		CacheEnabled    bool          `yaml:"cache_enabled"`
 	} `yaml:"docker"`
 
 	Clients struct {
