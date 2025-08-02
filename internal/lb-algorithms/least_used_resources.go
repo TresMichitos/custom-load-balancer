@@ -16,9 +16,13 @@ func NewLeastUsedResources() *leastUsedResources {
 	return &leastUsedResources{}
 }
 
+func (lur *leastUsedResources) GetName() string {
+	return "leastUsedResources"
+}
+
 // Selects the healthiest node based on weighted cpu and memory usage
 // Using 60/40 weighting rule
-func (leastUsedResources *leastUsedResources) NextServerNode(serverPool *serverpool.ServerPool, _ *http.Request) *serverpool.ServerNode {
+func (lur *leastUsedResources) NextServerNode(serverPool *serverpool.ServerPool, _ *http.Request) *serverpool.ServerNode {
 	if len(serverPool.Healthy) == 1 {
 		return serverPool.Healthy[0]
 	}
