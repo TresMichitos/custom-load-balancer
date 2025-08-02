@@ -10,42 +10,44 @@ import (
 )
 
 // Update healthy pool at regular interval
-func HealthCheckLoop(serverPool *ServerPool, timeout time.Duration, interval time.Duration) {
-	for {
-		healthMap := make(map[*ServerNode]bool)
-		var mapMu sync.Mutex
+func StartHealthChecking(serverPool *ServerPool, timeout time.Duration, interval time.Duration) {
+	go func() {
+		for {
+			healthMap := make(map[*ServerNode]bool)
+			var mapMu sync.Mutex
 
-		var wg sync.WaitGroup
+			var wg sync.WaitGroup
 
-		serverPool.mu.Lock()
-		for _, serverNode := range serverPool.All {
-			wg.Add(1)
-			go func(server *ServerNode) {
-				defer wg.Done()
-				healthy := isServerHealthy(server, timeout)
+			serverPool.mu.Lock()
+			for _, serverNode := range serverPool.All {
+				wg.Add(1)
+				go func(server *ServerNode) {
+					defer wg.Done()
+					healthy := isServerHealthy(server, timeout)
 
-				mapMu.Lock()
-				healthMap[server] = healthy
-				mapMu.Unlock()
-			}(serverNode)
-		}
-		serverPool.mu.Unlock()
-
-		wg.Wait()
-
-		healthyPool := []*ServerNode{}
-		for _, node := range serverPool.All {
-			if healthMap[node] {
-				healthyPool = append(healthyPool, node)
+					mapMu.Lock()
+					healthMap[server] = healthy
+					mapMu.Unlock()
+				}(serverNode)
 			}
+			serverPool.mu.Unlock()
+
+			wg.Wait()
+
+			healthyPool := []*ServerNode{}
+			for _, node := range serverPool.All {
+				if healthMap[node] {
+					healthyPool = append(healthyPool, node)
+				}
+			}
+
+			serverPool.mu.Lock()
+			serverPool.Healthy = healthyPool
+			serverPool.mu.Unlock()
+
+			time.Sleep(interval)
 		}
-
-		serverPool.mu.Lock()
-		serverPool.Healthy = healthyPool
-		serverPool.mu.Unlock()
-
-		time.Sleep(interval)
-	}
+	}()
 }
 
 // Attempts to send request and check status

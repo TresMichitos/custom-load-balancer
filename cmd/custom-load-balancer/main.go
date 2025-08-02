@@ -50,7 +50,7 @@ func main() {
 		log.Fatalf("Failed to initialise server: %v", err)
 	}
 
-	go serverpool.HealthCheckLoop(
+	serverpool.StartHealthChecking(
 		serverPool,
 		cfg.HealthCheck.Timeout,
 		cfg.HealthCheck.Interval,
