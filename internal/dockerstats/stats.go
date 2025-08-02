@@ -21,14 +21,12 @@ type ContainerStats struct {
 }
 
 var (
-	statsCache   = make(map[string]ContainerStats)
-	cacheMutex   sync.RWMutex
-	dockerClient *client.Client
+	statsCache = make(map[string]ContainerStats)
+	cacheMutex sync.RWMutex
 )
 
 // Polls stats every inter val and updates cache
-func StartStatsPolling(dockerClientInput *client.Client, interval time.Duration) {
-	dockerClient = dockerClientInput
+func StartStatsPolling(dockerClient *client.Client, interval time.Duration) {
 	go func() {
 		for {
 			stats, err := fetchDockerStats(dockerClient)
