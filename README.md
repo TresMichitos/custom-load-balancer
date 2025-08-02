@@ -130,9 +130,13 @@ Run Integration Tests with:
 ├── internal                              # Package imports
 │   ├── config                            # Utilities to load configuration
 │   │   └── config.go
+│   ├── dockerstats                       # Utilities to monitor container stats
+│   │   ├── sdk_client.go                 # Connect to Docker API
+│   │   └── stats.go                      # Checks Dockers utilisation statistics
 │   ├── lb-algorithms                     # Implementations of load balancing algorithms
 │   │   ├── ip_hashing.go
 │   │   ├── least_connections.go
+│   │   ├── least_used_resources.go.go
 │   │   ├── random.go
 │   │   ├── round_robin.go
 │   │   ├── round_robin_test.go
@@ -150,6 +154,7 @@ Run Integration Tests with:
 ├── compose.yml                           # File used for building the docker containers and describing how they should interact with each other
 ├── config.yml                            # Main configuration file for load balancer
 ├── go.mod                                # Go module definition (tracks dependencies and package name)
+├── go.sum                                # Go sum definition (logs dependencies downloaded)
 └── servers.json                          # Server list
 ```
 
