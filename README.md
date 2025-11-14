@@ -6,44 +6,57 @@
 
 Custom implementation of a load balancer using Go.
 
+Please see the [Jupyter notebook](notebooks/metrics-analysis.ipynb) for analysis and research.
+
 ## Installation
 
-1. Download the repository with:
+1. Clone the repository:
 
-   - ```
-     git clone https://github.com/TresMichitos/custom-load-balancer.git
-     ```
-   - Or by downloading as a ZIP file
+    ```
+    git clone https://github.com/TresMichitos/custom-load-balancer.git
+    ```
+    *Or by downloading as a ZIP file*
 
-2. Enter the project directory with:
+2. Enter the project directory:
    ```
    cd custom-load-balancer/
    ```
 
 ## Usage
 
-Run with:
-  ```
-  go run ./cmd/custom-load-balancer/
-  ```
-Or:
-  ```
-  docker compose up --build
-  ```
+### Starting the Distributed Network
 
-Send requests to load balancer with:
-  ```
-  curl http://localhost:8080
-  ```
-Or:
-  ```
-  go run demo/client/client.go --url ... --clients ... --duration ... --rate ...
-  ```
+The network is composed of Docker containers and can be spun up using:
+
+```
+docker compose up --build
+```
 
 Shut down containers with:
-  ```
-  docker compose down
-  ```
+```
+docker compose down
+```
+
+### Simulating Requests
+
+A [script](demo/multi-client/) was developed to effectively simulate concurrent requests.
+
+**Usage:**
+```
+go run demo/client/client.go
+```
+
+**Flags:**
+
+- `url` - Target URL (load balancer).
+- `clients` - Number of concurrent clients.
+- `duration` - Duration of test (can be specified using GOs time syntax).
+- `rate` - Number of requests per second, per client.
+
+Or:
+```
+curl http://localhost:8080
+```
 
 ---
 
@@ -82,6 +95,8 @@ Run Integration Tests with:
 - Possibly experiment with different load balancing algorithms
 
 ### Resources
+
+#### Load Balancing
 
 - [A Tour of Go](https://go.dev/tour/list)
 - [What is load balancing?](https://www.cloudflare.com/en-gb/learning/performance/what-is-load-balancing/)
@@ -157,4 +172,3 @@ Run Integration Tests with:
 ├── go.sum                                # Go sum definition (logs dependencies downloaded)
 └── servers.json                          # Server list
 ```
-
